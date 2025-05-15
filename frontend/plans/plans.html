@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Planos</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="shortcut icon" href="../images/ctdiegopradologo.jpeg" />
+</head>
+
+<body>
+  <header>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+      <img src="../images/ctdiegopradologo.jpeg" alt="Bootstrap" width="60" height="32">
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+          <div class="navbar-nav">
+            <a class="nav-link" href="../index.html">Página Inicial</a>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                Dashboard
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="../users/students.html">Alunos</a></li>
+                <li><a class="dropdown-item active" href="plans.html" aria-current="page">Planos</a></li>
+                <li>
+                  <hr class="dropdown-divider">
+                </li>
+                <li><a class="dropdown-item" href="../subscriptions/subscriptions.html">Inscrições</a></li>
+              </ul>
+            </li>
+            <a class="nav-link" href="../finance/finance.html">Financeiro</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container mt-4">
+    <!-- Título da Página -->
+    <div class="row mb-4">
+      <div class="col">
+        <h2 class="text-center">Gerenciamento de Planos</h2>
+      </div>
+    </div>
+
+    <!-- Container dos botões -->
+    <div class="row mb-4">
+      <div class="col d-flex justify-content-center">
+        <button id="btnCadastrarPlano" class="btn btn-primary" data-bs-toggle="modal" 
+          data-bs-target="#cadastroPlanoModal">
+          <i class="bi bi-plus-circle me-1"></i> Cadastrar Plano
+        </button>
+      </div>
+    </div>
+
+    <!-- Container lista de planos -->
+    <div class="row">
+      <div class="col">
+        <div class="card">
+          <div class="card-header bg-light">
+            <h5 class="card-title mb-0">Lista de Planos</h5>
+          </div>
+          <div class="card-body">
+            <ul class="list-group" id="plans-list">
+              <!-- Lista de planos será carregada aqui -->
+              <li class="list-group-item text-center">Carregando planos...</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paginação -->
+    <div class="row mt-4">
+      <div class="col">
+        <nav aria-label="Navegação de página">
+          <ul class="pagination justify-content-center">
+            <li class="page-item"><a class="page-link" href="#">Anterior</a></li>
+            <li class="page-item active"><a class="page-link" href="#" aria-current="page">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item"><a class="page-link" href="#">Próxima</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal de Cadastro de Plano -->
+  <div class="modal fade" id="cadastroPlanoModal" tabindex="-1" aria-labelledby="cadastroPlanoModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <form id="cadastroPlanoForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="cadastroPlanoModalLabel">Cadastrar Novo Plano</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="name" class="form-label">Nome do Plano</label>
+                <input type="text" class="form-control" id="name" required />
+              </div>
+              <div class="col-md-6">
+                <label for="durationMonths" class="form-label">Duração (meses)</label>
+                <input type="number" min="1" class="form-control" id="durationMonths" required />
+              </div>
+              <div class="col-md-6">
+                <label for="price" class="form-label">Preço (R$)</label>
+                <input type="number" step="0.01" min="0" class="form-control" id="price" required />
+              </div>
+              <div class="col-md-12">
+                <label for="description" class="form-label">Descrição</label>
+                <textarea class="form-control" id="description" rows="4"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Cadastrar</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para detalhes do plano -->
+  <div class="modal fade" id="planModal" tabindex="-1" aria-labelledby="planModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="planModalLabel">Detalhes do Plano</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <ul class="list-group mb-3" id="plan-details"></ul>
+          <div class="d-flex justify-content-between mt-3">
+            <button id="btnEditarPlano" class="btn btn-warning">Editar</button>
+            <button id="btnExcluirPlano" class="btn btn-danger">Excluir</button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para editar plano -->
+  <div class="modal fade" id="editPlanModal" tabindex="-1" aria-labelledby="editPlanModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <form id="editPlanForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editPlanModalLabel">Editar Plano</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="editPlanId">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="editName" class="form-label">Nome do Plano</label>
+                <input type="text" class="form-control" id="editName" required />
+              </div>
+              <div class="col-md-6">
+                <label for="editDurationMonths" class="form-label">Duração (meses)</label>
+                <input type="number" min="1" class="form-control" id="editDurationMonths" required />
+              </div>
+              <div class="col-md-6">
+                <label for="editPrice" class="form-label">Preço (R$)</label>
+                <input type="number" step="0.01" min="0" class="form-control" id="editPrice" required />
+              </div>
+              <div class="col-md-12">
+                <label for="editDescription" class="form-label">Descrição</label>
+                <textarea class="form-control" id="editDescription" rows="4"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Salvar</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <footer class="container mt-5 mb-4 text-center text-muted">
+    <p>© 2025 CT Diego Prado - Todos os direitos reservados</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
+    crossorigin="anonymous"></script>
+  <script src="plans.js"></script>
+</body>
+
+</html>

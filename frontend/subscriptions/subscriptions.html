@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inscrições</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="shortcut icon" href="../images/ctdiegopradologo.jpeg" />
+</head>
+
+<body>
+  <header>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+          <img src="../images/ctdiegopradologo.jpeg" alt="Bootstrap" width="60" height="32">
+          <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+              <a class="nav-link active" aria-current="page" href="../index.html">Página Inicial</a>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                  aria-expanded="false">
+                  Dashboard
+                </a>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="../users/students.html">Alunos</a></li>
+                  <li><a class="dropdown-item" href="../plans/plans.html">Planos</a></li>
+                  <li>
+                    <hr class="dropdown-divider">
+                  </li>
+                  <li><a class="dropdown-item" href="subscriptions.html">Inscrições</a></li>
+                </ul>
+              </li>
+              <a class="nav-link" href="../finance/finance.html">Financeiro</a>
+            </div>
+          </div>
+      </div>
+      <form class="d-flex justify-content-end me-3" role="search">
+        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
+        <button class="btn btn-outline-success" type="submit">Search</button>
+      </form>
+    </nav>
+  </header>
+
+  <main class="container mt-4">
+    <!-- Título da Página -->
+    <div class="row mb-4">
+      <div class="col">
+        <h2 class="text-center">Gerenciamento de Inscrições</h2>
+      </div>
+    </div>
+
+    <!-- Container dos botões -->
+    <div class="row mb-4">
+      <div class="col d-flex justify-content-center">
+        <button id="btnCadastrarSubscription" class="btn btn-primary" data-bs-toggle="modal"
+          data-bs-target="#cadastroSubscriptionModal">
+          <i class="bi bi-plus-circle me-1"></i> Cadastrar Inscrição
+        </button>
+      </div>
+    </div>
+
+    <!-- Container lista de inscrições -->
+    <div class="row">
+      <div class="col">
+        <div class="card">
+          <div class="card-header bg-light">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="card-title mb-0">Lista de Inscrições</h5>
+              <button type="button" class="btn btn-secondary" id="btnFiltrarSubscription">Filtrar</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <ul class="list-group" id="subscriptions-list">
+              <!-- Lista de inscrições será carregada aqui -->
+              <li class="list-group-item text-center">Carregando inscrições...</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paginação -->
+    <div class="row mt-4">
+      <div class="col">
+        <nav aria-label="Navegação de página">
+          <ul class="pagination justify-content-center">
+            <li class="page-item"><a class="page-link" href="#">Anterior</a></li>
+            <li class="page-item active"><a class="page-link" href="#" aria-current="page">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item"><a class="page-link" href="#">Próxima</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </main>
+
+
+  <!-- Modal de Cadastro de Inscrição -->
+  <div class="modal fade" id="cadastroSubscriptionModal" tabindex="-1" aria-labelledby="cadastroSubscriptionModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <form id="cadastroSubscriptionForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="cadastroSubscriptionModalLabel">Cadastrar Nova Inscrição</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row g-3">
+              <!-- Dados da inscrição -->
+              <div class="col-md-6">
+                <label for="studentSelect" class="form-label">Aluno</label>
+                <select id="studentSelect" class="form-select" required>
+                  <option value="">– Selecione o Aluno –</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="planSelect" class="form-label">Plano</label>
+                <select id="planSelect" class="form-select" required>
+                  <option value="">– Selecione o Plano –</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="subStatus" class="form-label">Status da Inscrição</label>
+                <select id="subStatus" class="form-select">
+                  <option value="active">Ativa</option>
+                  <option value="paused">Pausada</option>
+                  <option value="canceled">Cancelada</option>
+                  <option value="expired">Expirada</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="startDate" class="form-label">Data de Início</label>
+                <input type="date" class="form-control" id="startDate" required />
+              </div>
+              <div class="col-md-6">
+                <label for="endDate" class="form-label">Data de Fim</label>
+                <input type="date" class="form-control" id="endDate" />
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Cadastrar</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para detalhes da inscrição -->
+  <div class="modal fade" id="subscriptionModal" tabindex="-1" aria-labelledby="subscriptionModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="subscriptionModalLabel">Detalhes da Inscrição</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <ul class="list-group mb-3" id="subscription-details"></ul>
+          <div class="d-flex justify-content-between mt-3">
+            <button id="btnEditarSubscription" class="btn btn-warning">Editar</button>
+            <button id="btnExcluirSubscription" class="btn btn-danger">Excluir</button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para editar inscrição -->
+  <div class="modal fade" id="editSubscriptionModal" tabindex="-1" aria-labelledby="editSubscriptionModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <form id="editSubscriptionForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editSubscriptionModalLabel">Editar Inscrição</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="editSubId">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="editStudentSelect" class="form-label">Aluno</label>
+                <select id="editStudentSelect" class="form-select" required>
+                  <option value="">– Selecione o Aluno –</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="editPlanSelect" class="form-label">Plano</label>
+                <select id="editPlanSelect" class="form-select" required>
+                  <option value="">– Selecione o Plano –</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="editSubStatus" class="form-label">Status da Inscrição</label>
+                <select id="editSubStatus" class="form-select">
+                  <option value="active">Ativa</option>
+                  <option value="paused">Pausada</option>
+                  <option value="canceled">Cancelada</option>
+                  <option value="expired">Expirada</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="editStartDate" class="form-label">Data de Início</label>
+                <input type="date" class="form-control" id="editStartDate" required />
+              </div>
+              <div class="col-md-6">
+                <label for="editEndDate" class="form-label">Data de Fim</label>
+                <input type="date" class="form-control" id="editEndDate" />
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Salvar</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Filtro -->
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="filterModalLabel">Filtrar Inscrições</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="filterForm">
+          <div class="mb-3">
+            <label for="filterPlan" class="form-label">Plano</label>
+            <select class="form-select" id="filterPlan" name="plan">
+              <option value="">Selecione um plano</option>
+              <!-- Options de planos serão carregadas pelo JS -->
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="filterStatus" class="form-label">Status</label>
+            <select class="form-select" id="filterStatus" name="status">
+              <option value="">Selecione o status</option>
+              <option value="active">Ativo</option>
+              <option value="inactive">Pausado</option>
+              <option value="inactive">Expirado</option>
+              <option value="inactive">Cancelado</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+        <button type="button" class="btn btn-primary" id="applyFilter">Aplicar Filtro</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <footer class="container mt-5 mb-4 text-center text-muted">
+    <p>© 2025 CT Diego Prado - Todos os direitos reservados</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
+    crossorigin="anonymous"></script>
+  <script src="subscriptions.js"></script>
+</body>
+
+</html>
