@@ -160,10 +160,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Helper para formatar texto de status
   function formatStatus(status) {
     const statusMap = {
-      'active': 'Ativo',
-      'paused': 'Pausado',
-      'canceled': 'Cancelado',
-      'expired': 'Expirado'
+      'active': 'Ativa',
+      'paused': 'Pausada',
+      'canceled': 'Cancelada',
+      'expired': 'Expirada'
     };
     return statusMap[status] || status.charAt(0).toUpperCase() + status.slice(1);
   }
@@ -196,7 +196,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (currentFilters.plan) params.append('plan', currentFilters.plan);
       if (currentFilters.status) params.append('status', currentFilters.status);
-
       // Adicionar parâmetros à URL se houver filtros
       if (params.toString()) {
         url += `?${params.toString()}`;
