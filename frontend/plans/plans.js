@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   // Preenche o formulário de edição
-  function populateEditForm(plan) {o
+  function populateEditForm(plan) {
     document.getElementById('editPlanId').value = plan.id;
     document.getElementById('editName').value = plan.name;
     document.getElementById('editDurationMonths').value = plan.duration_months;
