@@ -12,7 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let plans = [];
   let currentFilters = {
     plan: '',
-    status: ''
+    status: '',
+    search:''
   };
 
   // Carrega planos para o select
@@ -196,6 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (currentFilters.plan) params.append('plan', currentFilters.plan);
       if (currentFilters.status) params.append('status', currentFilters.status);
+      if (currentFilters.search) params.append('search', currentFilters.search)
       // Adicionar parâmetros à URL se houver filtros
       if (params.toString()) {
         url += `?${params.toString()}`;
@@ -259,6 +261,16 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       console.error('Erro ao carregar inscrições:', err);
     }
+
+    document.getElementById('btnSearchSubscription').addEventListener('click', function (e) {
+  e.preventDefault(); // Impede que o formulário recarregue a página
+
+  const searchValue = document.getElementById('searchSubscription').value.trim();
+  currentFilters.search = searchValue; // Atualiza o filtro global
+
+  loadSubscriptions(); // Recarrega a lista com o filtro aplicado
+});
+
   }
 
   // Mostra detalhes da inscrição no modal
