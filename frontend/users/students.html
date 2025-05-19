@@ -194,7 +194,7 @@
               </div>
               <div class="col-6 form-check">
                 <input class="form-check-input" type="checkbox" id="takesMedication">
-                <label class="form-check-label" for="takesMedicationFaz uso de medicação?</label>
+                <label class="form-check-label" for="takesMedication">>Faz uso de medicação?"</label>
               </div>
               <div class="col-6 form-check">
                 <input class="form-check-input" type="checkbox" id="hadSurgeries">
@@ -215,7 +215,7 @@
               <!-- repita outros checkboxes aqui -->
               <div class="col-12">
                 <label for="physicalActivityFrequency" class="form-label">Frequência de atividade física</label>
-                <textarea class="form-control" id="physicalActivityFrequency rows="2"></textarea>
+                <textarea class="form-control" id="physicalActivityFrequency" rows="2"></textarea>
               </div>
               <div class="col-12">
                 <label for="fitnessGoals" class="form-label">Metas fitness</label>
@@ -314,7 +314,8 @@
             </li>
           </ul>
           <div class="d-flex mt-3">
-            <button id="btnEditarFichaMedica" class="btn btn-warning me-2">Editar</button>
+            <button id="btnEditarFichaMedica" class="btn btn-warning me-2" data-bs-toggle="modal"
+              data-bs-target="#editMedicalRecordModal">Editar</button>
             <button id="btnExcluirFichaMedica" class="btn btn-danger">Excluir</button>
           </div>
         </div>

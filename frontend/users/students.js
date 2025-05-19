@@ -3,10 +3,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const studentModalElement = document.getElementById('studentModal');
   const cadastroModalElement = document.getElementById('cadastroAlunoModal');
   const editModalElement = document.getElementById('editStudentModal');
+  const medicalRecordViewElement = document.getElementById('viewMedicalRecordModal');
+  const medicalRecordEditElement = document.getElementById('editMedicalRecordModal');
 
   const studentModal = new bootstrap.Modal(studentModalElement);
   const cadastroModal = new bootstrap.Modal(cadastroModalElement);
   const editModal = new bootstrap.Modal(editModalElement);
+  const medicalRecordViewModal = new bootstrap.Modal(medicalRecordViewElement);
+  const medicalRecordEditModal = new bootstrap.Modal(medicalRecordEditElement);
 
   let currentStudentId = null;
 
@@ -151,7 +155,80 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     };
 
+    document.getElementById('btnViewMedicalRecord').onclick = () => {
+      if (student.medical_record == null) {
+        medicalRecordViewModal.show();
+        cleanMedicalRecordViewForm(student.medical_record);
+      } else {
+        medicalRecordViewModal.show();
+        populateMedicalRecordViewForm(student.medical_record);
+      }
+    }
+
+    document.getElementById('btnEditarFichaMedica').onclick = () => {
+      if (student.medical_record == null) {
+        medicalRecordEditModal.show();
+        cleanMedicalRecordEditForm(student.medical_record);
+      } else {
+        medicalRecordEditModal.show();
+        populateMedicalRecordEditForm(student.medical_record);
+      }
+    }
+
     studentModal.show();
+  }
+
+  function populateMedicalRecordEditForm(medicalRecord) {
+    document.getElementById('editHasHeartProblems').checked = medicalRecord.has_heart_problems;
+    document.getElementById('editHasJointPain').checked = medicalRecord.has_joint_pain;
+    document.getElementById('editTakesMedication').checked = medicalRecord.takes_medication;
+    document.getElementById('editHadSurgeries').checked = medicalRecord.had_surgeries;
+    document.getElementById('editSmokes').checked = medicalRecord.smokes;
+    document.getElementById('editDrinksAlcohol').checked = medicalRecord.drinks_alcohol;
+    document.getElementById('editPracticesPhysicalActivity').checked = medicalRecord.practices_physical_activity;
+    document.getElementById('editPhysicalActivityFrequency').value = medicalRecord.physical_activity_frequency;
+    document.getElementById('editFitnessGoals').value = medicalRecord.fitness_goals;
+    document.getElementById('editMedicalRestrictions').value = medicalRecord.medical_restrictions;
+  }
+
+  function populateMedicalRecordViewForm(medicalRecord) {
+    document.getElementById('view_hasHeartProblems').textContent = medicalRecord.has_heart_problems ? "Sim" : "Não";
+    document.getElementById('view_hasJointPain').textContent = medicalRecord.has_joint_pain ? "Sim" : "Não";
+    document.getElementById('view_takesMedication').textContent = medicalRecord.takes_medication ? "Sim" : "Não";
+    document.getElementById('view_hadSurgeries').textContent = medicalRecord.had_surgeries ? "Sim" : "Não";
+    document.getElementById('view_smokes').textContent = medicalRecord.smokes ? "Sim" : "Não";
+    document.getElementById('view_drinksAlcohol').textContent = medicalRecord.drinks_alcohol ? "Sim" : "Não";
+    document.getElementById('view_practicesPhysicalActivity').textContent = medicalRecord.practices_physical_activity ? "Sim" : "Não";
+    document.getElementById('view_physicalActivityFrequency').textContent = medicalRecord.physical_activity_frequency || "Não informado.";
+    document.getElementById('view_fitnessGoals').textContent = medicalRecord.fitness_goals || "Não informado.";
+    document.getElementById('view_medicalRestrictions').textContent = medicalRecord.medical_restrictions || "Não informado.";
+  }
+
+  function cleanMedicalRecordViewForm(medicalRecord) {
+    document.getElementById('view_hasHeartProblems').textContent = "";
+    document.getElementById('view_hasJointPain').textContent = "";
+    document.getElementById('view_takesMedication').textContent = "";
+    document.getElementById('view_hadSurgeries').textContent = "";
+    document.getElementById('view_smokes').textContent = "";
+    document.getElementById('view_drinksAlcohol').textContent = "";
+    document.getElementById('view_practicesPhysicalActivity').textContent = "";
+    document.getElementById('view_physicalActivityFrequency').textContent = "";
+    document.getElementById('view_fitnessGoals').textContent = "";
+    document.getElementById('view_medicalRestrictions').textContent = "";
+  }
+
+  function cleanMedicalRecordEditForm(medicalRecord) {
+    document.getElementById('editHasHeartProblems').checked = false;
+    document.getElementById('editHasJointPain').checked = false;
+    document.getElementById('editTakesMedication').checked = false;
+    document.getElementById('editHadSurgeries').checked = false;
+    document.getElementById('editSmokes').checked = false;
+    document.getElementById('editDrinksAlcohol').checked = false;
+    document.getElementById('editPracticesPhysicalActivity').checked = false;
+    document.getElementById('editPhysicalActivityFrequency').value = '';
+    document.getElementById('editFitnessGoals').value = '';
+    document.getElementById('editMedicalRestrictions').value = '';
+
   }
 
   // Preenche formulário de edição
@@ -195,6 +272,34 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       console.error('Erro ao cadastrar aluno:', err);
       alert('Erro ao cadastrar aluno. Verifique os dados e tente novamente.');
+    }
+  }
+
+  async function handleMedicalRecordEditSubmit(e) {
+    e.preventDefault();
+    const id = document.getElementById('editStudentId').value;
+    const student = {
+      first_name: document.getElementById('editFirstName').value,
+      last_name: document.getElementById('editLastName').value,
+      phone: document.getElementById('editPhone').value || null,
+      email: document.getElementById('editEmail').value || null,
+      adress: document.getElementById('editAddress').value || null,
+      birthday_date: document.getElementById('editBirthDate').value || null,
+      created_at: document.getElementById('editRegistrationDate').value
+    };
+    try {
+      const res = await fetch(`${studentsUrl}${id}/`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(student)
+      });
+      if (!res.ok) throw new Error(`Erro ao atualizar aluno: ${res.status}`);
+      editModal.hide();
+      loadStudents();
+      alert('Aluno atualizado com sucesso!');
+    } catch (err) {
+      console.error('Erro ao atualizar aluno:', err);
+      alert(`Erro ao atualizar aluno: ${err.message}`);
     }
   }
 
