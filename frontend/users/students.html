@@ -160,78 +160,12 @@
           <ul class="list-group mb-3" id="student-details"></ul>
           <div class="d-flex justify-content-between mt-3">
             <button id="btnEditarAluno" class="btn btn-warning me-2">Editar</button>
-            <button id="btnViewMedicalRecord" type="button" class="btn btn-danger me-auto" data-bs-toggle="modal"
-              data-bs-target="#viewMedicalRecordModal">Ficha Médica</button>
             <button id="btnExcluirAluno" class="btn btn-danger">Excluir</button>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal de Ficha Médica (input) -->
-  <div class="modal fade" id="medicalRecordModal" tabindex="-1" aria-labelledby="medicalRecordModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <form id="medicalRecordForm">
-          <div class="modal-header">
-            <h5 class="modal-title" id="medicalRecordModalLabel">Ficha Médica</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <div class="row g-3">
-              <div class="col-6 form-check">
-                <input class="form-check-input" type="checkbox" id="hasHeartProblems">
-                <label class="form-check-label" for="hasHeartProblems">Problemas cardíacos?</label>
-              </div>
-              <div class="col-6 form-check">
-                <input class="form-check-input" type="checkbox" id="hasJointPain">
-                <label class="form-check-label" for="hasJointPain">Dores articulares?</label>
-              </div>
-              <div class="col-6 form-check">
-                <input class="form-check-input" type="checkbox" id="takesMedication">
-                <label class="form-check-label" for="takesMedication">>Faz uso de medicação?"</label>
-              </div>
-              <div class="col-6 form-check">
-                <input class="form-check-input" type="checkbox" id="hadSurgeries">
-                <label class="form-check-label" for="hadSurgeries">Fez alguma cirurgia?</label>
-              </div>
-              <div class="col-6 form-check">
-                <input class="form-check-input" type="checkbox" id="smokes">
-                <label class="form-check-label" for="smokes">Fuma?</label>
-              </div>
-              <div class="col-6 form-check">
-                <input class="form-check-input" type="checkbox" id="drinksAlcohol">
-                <label class="form-check-label" for="drinksAlcohol">Bebe álcool?</label>
-              </div>
-              <div class="col-6 form-check">
-                <input class="form-check-input" type="checkbox" id="practicesPhysicalActivity">
-                <label class="form-check-label" for="practicesPhysicalActivity">Pratica atividade física?</label>
-              </div>
-              <!-- repita outros checkboxes aqui -->
-              <div class="col-12">
-                <label for="physicalActivityFrequency" class="form-label">Frequência de atividade física</label>
-                <textarea class="form-control" id="physicalActivityFrequency" rows="2"></textarea>
-              </div>
-              <div class="col-12">
-                <label for="fitnessGoals" class="form-label">Metas fitness</label>
-                <textarea class="form-control" id="fitnessGoals" rows="2"></textarea>
-              </div>
-              <div class="col-12">
-                <label for="medicalRestrictions" class="form-label">Restrições médicas</label>
-                <textarea class="form-control" id="medicalRestrictions" rows="2"></textarea>
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-            <button type="submit" class="btn btn-primary">Salvar Ficha</button>
-          </div>
-        </form>
       </div>
     </div>
   </div>
@@ -287,109 +221,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Modal de Ficha Médica (view) -->
-  <div class="modal fade" id="viewMedicalRecordModal" tabindex="-1" aria-labelledby="viewMedicalRecordModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="viewMedicalRecordModalLabel">Ficha Médica</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <ul class="list-group">
-            <li class="list-group-item"><strong>Problemas cardíacos?</strong> <span id="view_hasHeartProblems"></span>
-            </li>
-            <li class="list-group-item"><strong>Dores articulares?</strong> <span id="view_hasJointPain"></span></li>
-            <li class="list-group-item"><strong>Faz uso de medicação?</strong> <span id="view_takesMedication"></span></li>
-            <li class="list-group-item"><strong>Fez alguma cirurgia?</strong> <span id="view_hadSurgeries"></span></li>
-            <li class="list-group-item"><strong>Fuma?</strong> <span id="view_smokes"></span></li>
-            <li class="list-group-item"><strong>Bebe álcool?</strong> <span id="view_drinksAlcohol"></span></li>
-            <li class="list-group-item"><strong>Pratica atividade física?</strong> <span id="view_practicesPhysicalActivity"></span></li>
-            <li class="list-group-item"><strong>Frequência de atividade física?</strong> <span id="view_physicalActivityFrequency"></span></li>
-            <!-- repita para cada pergunta -->
-            <li class="list-group-item"><strong>Metas fitness:</strong> <span id="view_fitnessGoals"></span></li>
-            <li class="list-group-item"><strong>Restrições médicas:</strong> <span id="view_medicalRestrictions"></span>
-            </li>
-          </ul>
-          <div class="d-flex mt-3">
-            <button id="btnEditarFichaMedica" class="btn btn-warning me-2" data-bs-toggle="modal"
-              data-bs-target="#editMedicalRecordModal">Editar</button>
-            <button id="btnExcluirFichaMedica" class="btn btn-danger">Excluir</button>
-          </div>
-        </div>
-        <div class="modal-footer">
-
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal de Edição de Ficha Médica -->
-<div class="modal fade" id="editMedicalRecordModal" tabindex="-1" aria-labelledby="editMedicalRecordModalLabel"
-  aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <form id="editMedicalRecordForm">
-        <div class="modal-header">
-          <h5 class="modal-title" id="editMedicalRecordModalLabel">Editar Ficha Médica</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <input type="hidden" id="editMedicalRecordId">
-          <div class="row g-3">
-            <div class="col-6 form-check">
-              <input class="form-check-input" type="checkbox" id="editHasHeartProblems">
-              <label class="form-check-label" for="editHasHeartProblems">Problemas cardíacos?</label>
-            </div>
-            <div class="col-6 form-check">
-              <input class="form-check-input" type="checkbox" id="editHasJointPain">
-              <label class="form-check-label" for="editHasJointPain">Dores articulares?</label>
-            </div>
-            <div class="col-6 form-check">
-              <input class="form-check-input" type="checkbox" id="editTakesMedication">
-              <label class="form-check-label" for="editTakesMedication">Faz uso de medicação?</label>
-            </div>
-            <div class="col-6 form-check">
-              <input class="form-check-input" type="checkbox" id="editHadSurgeries">
-              <label class="form-check-label" for="editHadSurgeries">Fez alguma cirurgia?</label>
-            </div>
-            <div class="col-6 form-check">
-              <input class="form-check-input" type="checkbox" id="editSmokes">
-              <label class="form-check-label" for="editSmokes">Fuma?</label>
-            </div>
-            <div class="col-6 form-check">
-              <input class="form-check-input" type="checkbox" id="editDrinksAlcohol">
-              <label class="form-check-label" for="editDrinksAlcohol">Bebe álcool?</label>
-            </div>
-            <div class="col-6 form-check">
-              <input class="form-check-input" type="checkbox" id="editPracticesPhysicalActivity">
-              <label class="form-check-label" for="editPracticesPhysicalActivity">Pratica atividade física?</label>
-            </div>
-            <div class="col-12">
-              <label for="editPhysicalActivityFrequency" class="form-label">Frequência de atividade física</label>
-              <textarea class="form-control" id="editPhysicalActivityFrequency" rows="2"></textarea>
-            </div>
-            <div class="col-12">
-              <label for="editFitnessGoals" class="form-label">Metas fitness</label>
-              <textarea class="form-control" id="editFitnessGoals" rows="2"></textarea>
-            </div>
-            <div class="col-12">
-              <label for="editMedicalRestrictions" class="form-label">Restrições médicas</label>
-              <textarea class="form-control" id="editMedicalRestrictions" rows="2"></textarea>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
 
   <footer class="container mt-5 mb-4 text-center text-muted">
     <p>© 2025 CT Diego Prado - Todos os direitos reservados</p>
