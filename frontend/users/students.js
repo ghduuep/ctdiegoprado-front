@@ -8,7 +8,50 @@ document.addEventListener('DOMContentLoaded', () => {
   const cadastroModal = new bootstrap.Modal(cadastroModalElement);
   const editModal = new bootstrap.Modal(editModalElement);
 
+  const itemsPerPage = 10;
+  let currentPage = 1;
+
   let currentStudentId = null;
+
+    // ==== Autenticação Token ==== //
+  function getToken() {
+    return localStorage.getItem('token');
+  }
+
+  function redirectToLogin() {
+    window.location.href = '../login/login.html';
+  }
+
+  function authFetch(url, options = {}) {
+    const token = getToken();
+    if (!token) {
+      redirectToLogin();
+      return Promise.reject('No token, redirecting to login');
+    }
+    options.headers = {
+      ...(options.headers || {}),
+      'Content-Type': 'application/json',
+      'Authorization': `Token ${token}`,
+    };
+    return fetch(url, options).then(resp => {
+      if (resp.status === 401 || resp.status === 403) {
+        // token inválido ou expirado
+        localStorage.removeItem('token');
+        redirectToLogin();
+        return Promise.reject('Unauthorized');
+      }
+      return resp;
+    });
+  }
+
+  function checkAuth() {
+    if (!getToken()) {
+      redirectToLogin();
+    }
+  }
+
+  // Verifica autenticação ao carregar a página
+  checkAuth();
 
   function init() {
     // evento de busca
@@ -57,15 +100,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Carrega a lista de alunos (com opção de busca)
-  async function loadStudents(searchTerm = '') {
+    async function loadStudents(searchTerm = '', page = 1) {
     try {
+      currentPage = page;
       let url = studentsUrl;
       if (searchTerm) {
         url += `?search=${encodeURIComponent(searchTerm)}`;
       }
+      url += (url.includes('?') ? '&' : '?') + `page=${page}`;
 
-      const resp = await fetch(url);
-      if (!resp.ok) throw new Error(`Erro ao buscar alunos: ${resp.status}`);
+      const resp = await authFetch(url);
       const data = await resp.json();
 
       const ul = document.getElementById('students-list');
@@ -105,6 +149,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ul.append(li);
       });
 
+      renderPagination(data);
+
     } catch (err) {
       console.error('Erro ao carregar alunos:', err);
       document.getElementById('students-list').innerHTML =
@@ -112,48 +158,53 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Mostra detalhes no modal
-  function showDetails(student) {
-    currentStudentId = student.id;
-    const detailsList = document.getElementById('student-details');
-    detailsList.innerHTML = '';
+  function renderPagination(data) {
+    const pagination = document.getElementById('pagination');
+    pagination.innerHTML = '';
 
-    const details = [
-      { label: 'ID', value: student.id },
-      { label: 'Nome Completo', value: `${student.first_name} ${student.last_name}` },
-      { label: 'Telefone', value: student.phone || 'Não informado' },
-      { label: 'Email', value: student.email || 'Não informado' },
-      { label: 'Endereço', value: student.adress || 'Não informado' },
-      { label: 'Data de Nascimento', value: formatDate(student.birthday_date) },
-      { label: 'Idade', value: calcAge(student.birthday_date) },
-      { label: 'Data de Registro', value: formatDate(student.created_at) }
-    ];
+    const totalPages = Math.ceil(data.count / itemsPerPage);
+    const currentPage = getCurrentPageFromUrl(data);
 
-    details.forEach(d => {
-      const li = document.createElement('li');
-      li.className = 'list-group-item';
-      li.textContent = `${d.label}: ${d.value}`;
-      detailsList.append(li);
+    const prevLi = document.createElement('li');
+  prevLi.className = `page-item ${!data.previous ? 'disabled' : ''}`;
+  prevLi.innerHTML = `<a class="page-link" href="#">Anterior</a>`;
+  prevLi.addEventListener('click', e => {
+    e.preventDefault();
+    if (data.previous) loadStudents('', currentPage - 1);
+  });
+  pagination.appendChild(prevLi);
+
+  // Números de página
+  for (let i = 1; i <= totalPages; i++) {
+    const li = document.createElement('li');
+    li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+    li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+    li.addEventListener('click', e => {
+      e.preventDefault();
+      loadStudents('', i);
     });
-
-    document.getElementById('studentModalLabel').textContent =
-      `${student.first_name} ${student.last_name}`;
-
-    document.getElementById('btnEditarAluno').onclick = () => {
-      studentModal.hide();
-      populateEditForm(student);
-      editModal.show();
-    };
-
-    document.getElementById('btnExcluirAluno').onclick = () => {
-      if (confirm(`Deseja realmente excluir o aluno ${student.first_name}?`)) {
-        deleteStudent(student.id);
-      }
-    };
-
-    studentModal.show();
+    pagination.appendChild(li);
   }
 
+  // Botão "Próxima"
+  const nextLi = document.createElement('li');
+  nextLi.className = `page-item ${!data.next ? 'disabled' : ''}`;
+  nextLi.innerHTML = `<a class="page-link" href="#">Próxima</a>`;
+  nextLi.addEventListener('click', e => {
+    e.preventDefault();
+    if (data.next) loadStudents('', currentPage + 1);
+  });
+  pagination.appendChild(nextLi);
+  } 
+
+  function getCurrentPageFromUrl(data) {
+    const url = data.next || data.previous;
+    if (!url) return data.next ? 1 : data.previous ? 2 : 1;
+
+    const match = url.match(/page=(\d+)/);
+    let pageNum = match ? parseInt(match[1]) : 1;
+    return data.next ? pageNum - 1 : pageNum + 1;
+  }
 
   // Preenche formulário de edição
   function populateEditForm(student) {
@@ -182,12 +233,11 @@ document.addEventListener('DOMContentLoaded', () => {
       created_at: document.getElementById('registrationDate').value
     };
     try {
-      const res = await fetch(studentsUrl, {
+      const res = await authFetch(studentsUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(student)
       });
-      if (!res.ok) throw new Error(`Erro ao cadastrar aluno: ${res.status}`);
       await res.json();
       cadastroModal.hide();
       e.target.reset();
@@ -213,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
       created_at: document.getElementById('editRegistrationDate').value
     };
     try {
-      const res = await fetch(`${studentsUrl}${id}/`, {
+      const res = await authFetch(`${studentsUrl}${id}/`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(student)
@@ -231,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Exclui aluno
   async function deleteStudent(id) {
     try {
-      const res = await fetch(`${studentsUrl}${id}/`, { method: 'DELETE' });
+      const res = await authFetch(`${studentsUrl}${id}/`, { method: 'DELETE' });
       if (!res.ok) throw new Error(`Erro ao excluir aluno: ${res.status}`);
       studentModal.hide();
       loadStudents();

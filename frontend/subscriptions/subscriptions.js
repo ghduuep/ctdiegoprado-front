@@ -7,19 +7,61 @@ document.addEventListener('DOMContentLoaded', () => {
   const editModal = new bootstrap.Modal(document.getElementById('editSubscriptionModal'));
   const filterModal = new bootstrap.Modal(document.getElementById('filterModal'));
 
+  const itemsPerPage = 10;
+  let currentPage = 1;
   let currentSubscriptionId = null;
   let students = [];
   let plans = [];
   let currentFilters = {
     plan: '',
     status: '',
-    search:''
+    search: ''
   };
+
+   // ==== Autenticação Token ==== //
+  function getToken() {
+    return localStorage.getItem('token');
+  }
+
+  function redirectToLogin() {
+    window.location.href = '../login/login.html';
+  }
+
+  function authFetch(url, options = {}) {
+    const token = getToken();
+    if (!token) {
+      redirectToLogin();
+      return Promise.reject('No token, redirecting to login');
+    }
+    options.headers = {
+      ...(options.headers || {}),
+      'Content-Type': 'application/json',
+      'Authorization': `Token ${token}`,
+    };
+    return fetch(url, options).then(resp => {
+      if (resp.status === 401 || resp.status === 403) {
+        // token inválido ou expirado
+        localStorage.removeItem('token');
+        redirectToLogin();
+        return Promise.reject('Unauthorized');
+      }
+      return resp;
+    });
+  }
+
+  function checkAuth() {
+    if (!getToken()) {
+      redirectToLogin();
+    }
+  }
+
+  // Verifica autenticação ao carregar a página
+  checkAuth();
 
   // Carrega planos para o select
   async function loadPlans() {
     try {
-      const resp = await fetch(plansUrl);
+      const resp = await authFetch(plansUrl);
       const data = await resp.json();
       plans = data.results;
 
@@ -42,29 +84,65 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Carrega alunos para o select
-  async function loadStudents() {
-    try {
-      const resp = await fetch(studentsUrl);
-      const data = await resp.json();
-      students = data.results;
-
-      // Popula os selects de alunos
-      ['studentSelect', 'editStudentSelect', 'filterStudent'].forEach(id => {
-        const sel = document.getElementById(id);
-        sel.innerHTML = '<option value="">– Selecione o Aluno –</option>';
-        students.forEach(student => {
-          const opt = document.createElement('option');
-          opt.value = student.id;
-          opt.textContent = `${student.first_name || ''} ${student.last_name || ''}`;
-          sel.append(opt);
-        });
+ // Carrega alunos para o select
+async function loadStudents() {
+  try {
+    // Inicializar Select2 com AJAX apenas para studentSelect e editStudentSelect
+    ['studentSelect', 'editStudentSelect'].forEach(id => {
+      $(`#${id}`).select2({
+        placeholder: '– Selecione o Aluno –',
+        allowClear: true,
+        width: '100%',
+        dropdownParent: id === 'studentSelect' ? $('#cadastroSubscriptionModal') : $('#editSubscriptionModal'),
+        minimumResultsForSearch: 1,
+        ajax: {
+          url: studentsUrl,
+          dataType: 'json',
+          delay: 250, // Atraso para evitar muitas requisições
+          data: params => ({
+            search: params.term, // Termo de busca digitado
+            page: params.page || 1 // Página para paginação
+          }),
+          processResults: (data, params) => {
+            params.page = params.page || 1;
+            return {
+              results: data.results.map(student => ({
+                id: student.id,
+                text: `${student.first_name || ''} ${student.last_name || ''}`
+              })),
+              pagination: {
+                more: !!data.next // Indica se há mais páginas
+              }
+            };
+          },
+          cache: true
+        },
+        language: {
+          noResults: () => 'Nenhum aluno encontrado',
+          searching: () => 'Buscando...',
+          inputTooShort: () => 'Digite pelo menos 1 caractere',
+          loadingMore: () => 'Carregando mais resultados...'
+        }
       });
-      return true;
-    } catch (err) {
-      console.error('Erro ao carregar alunos:', err);
-      return false;
+    });
+
+    // Carregar alunos na variável global apenas para outras funções, se necessário
+    let allStudents = [];
+    let nextUrl = studentsUrl;
+    while (nextUrl) {
+      const resp = await authFetch(nextUrl);
+      const data = await resp.json();
+      allStudents = allStudents.concat(data.results);
+      nextUrl = data.next;
     }
+    students = allStudents;
+
+    return true;
+  } catch (err) {
+    console.error('Erro ao carregar alunos:', err);
+    return false;
   }
+}
 
   // Inicialização assíncrona
   async function init() {
@@ -189,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Carrega a lista de inscrições
-  async function loadSubscriptions() {
+  async function loadSubscriptions(page = 1) {
     try {
       // Construir URL com parâmetros de filtro
       let url = subscriptionsUrl;
@@ -197,13 +275,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (currentFilters.plan) params.append('plan', currentFilters.plan);
       if (currentFilters.status) params.append('status', currentFilters.status);
-      if (currentFilters.search) params.append('search', currentFilters.search)
+      if (currentFilters.search) params.append('search', currentFilters.search);
+
+      params.append('page', page);
       // Adicionar parâmetros à URL se houver filtros
       if (params.toString()) {
         url += `?${params.toString()}`;
       }
 
-      const resp = await fetch(url);
+      const resp = await authFetch(url);
       const data = await resp.json();
       const ul = document.getElementById('subscriptions-list');
       ul.innerHTML = '';
@@ -258,19 +338,59 @@ document.addEventListener('DOMContentLoaded', () => {
         li.append(infoDiv, dates, statusDiv);
         ul.append(li);
       });
+
+      renderSubscriptionsPagination(data, page);
     } catch (err) {
       console.error('Erro ao carregar inscrições:', err);
     }
 
     document.getElementById('btnSearchSubscription').addEventListener('click', function (e) {
-  e.preventDefault(); // Impede que o formulário recarregue a página
+      e.preventDefault(); // Impede que o formulário recarregue a página
 
-  const searchValue = document.getElementById('searchSubscription').value.trim();
-  currentFilters.search = searchValue; // Atualiza o filtro global
+      const searchValue = document.getElementById('searchSubscription').value.trim();
+      currentFilters.search = searchValue; // Atualiza o filtro global
 
-  loadSubscriptions(); // Recarrega a lista com o filtro aplicado
-});
+      loadSubscriptions(1); // Recarrega a lista com o filtro aplicado
+    });
 
+  }
+
+  function renderSubscriptionsPagination(data, page) {
+    const pagination = document.getElementById('pagination');
+    pagination.innerHTML = '';
+    const totalPages = Math.ceil(data.count / itemsPerPage);
+
+    // Botão anterior
+    const prevLi = document.createElement('li');
+    prevLi.className = `page-item ${!data.previous ? 'disabled' : ''}`;
+    prevLi.innerHTML = `<a class="page-link" href="#">Anterior</a>`;
+    prevLi.addEventListener('click', e => {
+      e.preventDefault();
+      if (data.previous) loadSubscriptions(currentPage - 1);
+    });
+    pagination.appendChild(prevLi);
+
+    // Páginas
+    for (let i = 1; i <= totalPages; i++) {
+      const li = document.createElement('li');
+      li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+      li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+      li.addEventListener('click', e => {
+        e.preventDefault();
+        loadSubscriptions(i);
+      });
+      pagination.appendChild(li);
+    }
+
+    // Botão próxima
+    const nextLi = document.createElement('li');
+    nextLi.className = `page-item ${!data.next ? 'disabled' : ''}`;
+    nextLi.innerHTML = `<a class="page-link" href="#">Próxima</a>`;
+    nextLi.addEventListener('click', e => {
+      e.preventDefault();
+      if (data.next) loadSubscriptions(currentPage + 1);
+    });
+    pagination.appendChild(nextLi);
   }
 
   // Mostra detalhes da inscrição no modal
@@ -356,7 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     try {
-      const res = await fetch(subscriptionsUrl, {
+      const res = await authFetch(subscriptionsUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(subscription)
@@ -394,7 +514,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     try {
-      const res = await fetch(`${subscriptionsUrl}${id}/`, {
+      const res = await authFetch(`${subscriptionsUrl}${id}/`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(subscription)
@@ -415,7 +535,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Função para excluir inscrição
   async function deleteSubscription(id) {
     try {
-      const res = await fetch(`${subscriptionsUrl}${id}/`, {
+      const res = await authFetch(`${subscriptionsUrl}${id}/`, {
         method: 'DELETE'
       });
 

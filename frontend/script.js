@@ -2,6 +2,46 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log('index.js carregado');
   const subscriptionsUrl = "http://127.0.0.1:8000/api/subscriptions/";
 
+   // ==== Autenticação Token ==== //
+  function getToken() {
+    return localStorage.getItem('token');
+  }
+
+  function redirectToLogin() {
+    window.location.href = 'login/login.html';
+  }
+
+  function authFetch(url, options = {}) {
+    const token = getToken();
+    if (!token) {
+      redirectToLogin();
+      return Promise.reject('No token, redirecting to login');
+    }
+    options.headers = {
+      ...(options.headers || {}),
+      'Content-Type': 'application/json',
+      'Authorization': `Token ${token}`,
+    };
+    return fetch(url, options).then(resp => {
+      if (resp.status === 401 || resp.status === 403) {
+        // token inválido ou expirado
+        localStorage.removeItem('token');
+        redirectToLogin();
+        return Promise.reject('Unauthorized');
+      }
+      return resp;
+    });
+  }
+
+  function checkAuth() {
+    if (!getToken()) {
+      redirectToLogin();
+    }
+  }
+
+  // Verifica autenticação ao carregar a página
+  checkAuth();
+
   // Verifica elementos DOM
   const cardIds = ['totalClientes', 'mensalidadesAtivas', 'mensalidadesPausadas', 'mensalidadesExpiradas'];
   console.log('Elementos DOM:', cardIds.map(id => ({ id, element: document.getElementById(id) })));
@@ -14,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       // Busca os dados das inscrições
-      const response = await fetch(subscriptionsUrl);
+      const response = await authFetch(subscriptionsUrl);
       console.log('Resposta recebida:', { status: response.status, ok: response.ok });
       if (!response.ok) {
         throw new Error(`Erro ao buscar dados: ${response.status} ${response.statusText}`);

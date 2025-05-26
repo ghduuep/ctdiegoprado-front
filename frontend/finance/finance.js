@@ -6,13 +6,53 @@ document.addEventListener('DOMContentLoaded', () => {
     const plansUrl         = "http://127.0.0.1:8000/api/plans/";
     const cardElem         = document.getElementById("ganhosTotais");
 
+     // ==== Autenticação Token ==== //
+  function getToken() {
+    return localStorage.getItem('token');
+  }
+
+  function redirectToLogin() {
+    window.location.href = '../login/login.html';
+  }
+
+  function authFetch(url, options = {}) {
+    const token = getToken();
+    if (!token) {
+      redirectToLogin();
+      return Promise.reject('No token, redirecting to login');
+    }
+    options.headers = {
+      ...(options.headers || {}),
+      'Content-Type': 'application/json',
+      'Authorization': `Token ${token}`,
+    };
+    return fetch(url, options).then(resp => {
+      if (resp.status === 401 || resp.status === 403) {
+        // token inválido ou expirado
+        localStorage.removeItem('token');
+        redirectToLogin();
+        return Promise.reject('Unauthorized');
+      }
+      return resp;
+    });
+  }
+
+  function checkAuth() {
+    if (!getToken()) {
+      redirectToLogin();
+    }
+  }
+
+  // Verifica autenticação ao carregar a página
+  checkAuth();
+
     try {
       console.log("→ Chamando inscrição ativa em:", subscriptionsUrl);
       console.log("→ Chamando lista de planos em:  ", plansUrl);
 
       const [subsRes, plansRes] = await Promise.all([
-        fetch(subscriptionsUrl),
-        fetch(plansUrl)
+        authFetch(subscriptionsUrl),
+        authFetch(plansUrl)
       ]);
 
       console.log("← subscriptions response:", subsRes.url, subsRes.status);

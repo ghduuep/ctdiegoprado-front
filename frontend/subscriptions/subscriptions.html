@@ -8,9 +8,11 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous" />
   <link rel="shortcut icon" href="../images/ctdiegopradologo.jpeg" />
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 </head>
 
 <body>
+  
   <header>
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
       <div class="container-fluid">
@@ -87,11 +89,7 @@
       <div class="col">
         <nav aria-label="Navegação de página">
           <ul class="pagination justify-content-center" id="pagination">
-            <li class="page-item"><a class="page-link" href="#">Anterior</a></li>
-            <li class="page-item active"><a class="page-link" href="#" aria-current="page">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item"><a class="page-link" href="#">Próxima</a></li>
+            <!--Preenchido dinamicamente-->
           </ul>
         </nav>
       </div>
@@ -114,7 +112,7 @@
               <!-- Dados da inscrição -->
               <div class="col-md-6">
                 <label for="studentSelect" class="form-label">Aluno</label>
-                <select id="studentSelect" class="form-select" required>
+                <select id="studentSelect" class="form-select select2" required>
                   <option value="">– Selecione o Aluno –</option>
                 </select>
               </div>
@@ -273,7 +271,10 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
     crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <script src="subscriptions.js"></script>
+  
 </body>
 
 </html>
