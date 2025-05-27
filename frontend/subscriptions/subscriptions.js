@@ -269,6 +269,7 @@ async function loadStudents() {
   // Carrega a lista de inscrições
   async function loadSubscriptions(page = 1) {
     try {
+      currentPage = page;
       // Construir URL com parâmetros de filtro
       let url = subscriptionsUrl;
       const params = new URLSearchParams();
