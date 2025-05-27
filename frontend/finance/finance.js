@@ -2,8 +2,8 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   (async function loadGanhosTotais() {
-    const subscriptionsUrl = "http://127.0.0.1:8000/api/subscriptions/?status=active";
-    const plansUrl         = "http://127.0.0.1:8000/api/plans/";
+    const subscriptionsUrl = "https://ctdiegoprado-api.onrender.com/api/subscriptions/?status=active";
+    const plansUrl         = "https://ctdiegoprado-api.onrender.com/api/plans/";
     const cardElem         = document.getElementById("ganhosTotais");
 
      // ==== Autenticação Token ==== //

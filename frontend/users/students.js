@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const studentsUrl = "http://127.0.0.1:8000/api/students/";
+  const studentsUrl = "https://ctdiegoprado-api.onrender.com/api/students/";
   const studentModalElement = document.getElementById('studentModal');
   const cadastroModalElement = document.getElementById('cadastroAlunoModal');
   const editModalElement = document.getElementById('editStudentModal');

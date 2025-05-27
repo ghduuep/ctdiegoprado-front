@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const plansUrl = "http://127.0.0.1:8000/api/plans/";
+  const plansUrl = "https://ctdiegoprado-api.onrender.com/api/plans/";
   const planModal = new bootstrap.Modal(document.getElementById('planModal'));
   const cadastroModal = new bootstrap.Modal(document.getElementById('cadastroPlanoModal'));
   const editModal = new bootstrap.Modal(document.getElementById('editPlanModal'));
