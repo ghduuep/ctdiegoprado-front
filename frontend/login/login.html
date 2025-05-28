@@ -52,7 +52,7 @@
       e.preventDefault();
       const username = document.getElementById("username").value;
       const password = document.getElementById("password").value;
-      const API_BASE = "http://127.0.0.1:8000";
+      const API_BASE = "https://ctdiegoprado-api-production.up.railway.app";
 
       try {
         const response = await fetch(`${API_BASE}/api/login/`, {
