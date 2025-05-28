@@ -2,8 +2,8 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   (async function loadGanhosTotais() {
-    const subscriptionsUrl = "https://ctdiegoprado-api.onrender.com/api/subscriptions/?status=active";
-    const plansUrl         = "https://ctdiegoprado-api.onrender.com/api/plans/";
+    const subscriptionsUrl = "https://ctdiegoprado-api-production.up.railway.app/api/subscriptions/?status=active";
+    const plansUrl         = "https://ctdiegoprado-api-production.up.railway.app/api/plans/";
     const cardElem         = document.getElementById("ganhosTotais");
 
      // ==== Autenticação Token ==== //

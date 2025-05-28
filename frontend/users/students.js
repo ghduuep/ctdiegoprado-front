@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const studentsUrl = "https://ctdiegoprado-api.onrender.com/api/students/";
+  const studentsUrl = "https://ctdiegoprado-api-production.up.railway.app/api/students/";
   const studentModalElement = document.getElementById('studentModal');
   const cadastroModalElement = document.getElementById('cadastroAlunoModal');
   const editModalElement = document.getElementById('editStudentModal');

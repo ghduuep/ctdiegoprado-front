@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   console.log('index.js carregado');
-  const subscriptionsUrl = "https://ctdiegoprado-api.onrender.com/api/subscriptions/";
+  const subscriptionsUrl = "https://ctdiegoprado-api-production.up.railway.app/api/subscriptions/";
 
    // ==== Autenticação Token ==== //
   function getToken() {

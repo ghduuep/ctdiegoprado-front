@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const subscriptionsUrl = "https://ctdiegoprado-api.onrender.com/api/subscriptions/";
-  const plansUrl = "https://ctdiegoprado-api.onrender.com/api/plans/";
-  const studentsUrl = "https://ctdiegoprado-api.onrender.com/api/students/";
+  const subscriptionsUrl = "https://ctdiegoprado-api-production.up.railway.app/api/subscriptions/";
+  const plansUrl = "https://ctdiegoprado-api-production.up.railway.app/api/plans/";
+  const studentsUrl = "hhttps://ctdiegoprado-api-production.up.railway.app/api/students/";
   const subscriptionModal = new bootstrap.Modal(document.getElementById('subscriptionModal'));
   const cadastroModal = new bootstrap.Modal(document.getElementById('cadastroSubscriptionModal'));
   const editModal = new bootstrap.Modal(document.getElementById('editSubscriptionModal'));
