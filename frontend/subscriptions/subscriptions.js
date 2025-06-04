@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     search: ''
   };
 
-   // ==== Autenticação Token ==== //
+  // ==== Autenticação Token ==== //
   function getToken() {
     return localStorage.getItem('token');
   }
@@ -84,65 +84,82 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Carrega alunos para o select
- // Carrega alunos para o select
-async function loadStudents() {
-  try {
-    // Inicializar Select2 com AJAX apenas para studentSelect e editStudentSelect
-    ['studentSelect', 'editStudentSelect'].forEach(id => {
-      $(`#${id}`).select2({
-        placeholder: '– Selecione o Aluno –',
-        allowClear: true,
-        width: '100%',
-        dropdownParent: id === 'studentSelect' ? $('#cadastroSubscriptionModal') : $('#editSubscriptionModal'),
-        minimumResultsForSearch: 1,
-        ajax: {
-          url: studentsUrl,
-          dataType: 'json',
-          delay: 250, // Atraso para evitar muitas requisições
-          data: params => ({
-            search: params.term, // Termo de busca digitado
-            page: params.page || 1 // Página para paginação
-          }),
-          processResults: (data, params) => {
-            params.page = params.page || 1;
-            return {
-              results: data.results.map(student => ({
-                id: student.id,
-                text: `${student.first_name || ''} ${student.last_name || ''}`
-              })),
-              pagination: {
-                more: !!data.next // Indica se há mais páginas
+  // Carrega alunos para o select
+  async function loadStudents() {
+    try {
+      // Inicializar Select2 com AJAX apenas para studentSelect e editStudentSelect
+      ['studentSelect', 'editStudentSelect'].forEach(id => {
+        $(`#${id}`).select2({
+          placeholder: '– Selecione o Aluno –',
+          allowClear: true,
+          width: '100%',
+          dropdownParent: id === 'studentSelect' ? $('#cadastroSubscriptionModal') : $('#editSubscriptionModal'),
+          minimumResultsForSearch: 1,
+          ajax: {
+            url: studentsUrl,
+            dataType: 'json',
+            delay: 250, // Atraso para evitar muitas requisições
+            // Configuração dos headers com token de autenticação
+            beforeSend: function (xhr) {
+              const token = getToken();
+              if (!token) {
+                redirectToLogin();
+                return false;
               }
-            };
+              xhr.setRequestHeader('Content-Type', 'application/json');
+              xhr.setRequestHeader('Authorization', `Token ${token}`);
+            },
+            data: params => ({
+              search: params.term, // Termo de busca digitado
+              page: params.page || 1 // Página para paginação
+            }),
+            processResults: (data, params) => {
+              params.page = params.page || 1;
+              return {
+                results: data.results.map(student => ({
+                  id: student.id,
+                  text: `${student.first_name || ''} ${student.last_name || ''}`
+                })),
+                pagination: {
+                  more: !!data.next // Indica se há mais páginas
+                }
+              };
+            },
+            // Tratamento de erro para casos de token inválido
+            error: function (xhr, status, error) {
+              if (xhr.status === 401 || xhr.status === 403) {
+                localStorage.removeItem('token');
+                redirectToLogin();
+              }
+              console.error('Erro na requisição AJAX:', error);
+            },
+            cache: true
           },
-          cache: true
-        },
-        language: {
-          noResults: () => 'Nenhum aluno encontrado',
-          searching: () => 'Buscando...',
-          inputTooShort: () => 'Digite pelo menos 1 caractere',
-          loadingMore: () => 'Carregando mais resultados...'
-        }
+          language: {
+            noResults: () => 'Nenhum aluno encontrado',
+            searching: () => 'Buscando...',
+            inputTooShort: () => 'Digite pelo menos 1 caractere',
+            loadingMore: () => 'Carregando mais resultados...'
+          }
+        });
       });
-    });
 
-    // Carregar alunos na variável global apenas para outras funções, se necessário
-    let allStudents = [];
-    let nextUrl = studentsUrl;
-    while (nextUrl) {
-      const resp = await authFetch(nextUrl);
-      const data = await resp.json();
-      allStudents = allStudents.concat(data.results);
-      nextUrl = data.next;
+      // Carregar alunos na variável global apenas para outras funções, se necessário
+      let allStudents = [];
+      let nextUrl = studentsUrl;
+      while (nextUrl) {
+        const resp = await authFetch(nextUrl);
+        const data = await resp.json();
+        allStudents = allStudents.concat(data.results);
+        nextUrl = data.next;
+      }
+      students = allStudents;
+      return true;
+    } catch (err) {
+      console.error('Erro ao carregar alunos:', err);
+      return false;
     }
-    students = allStudents;
-
-    return true;
-  } catch (err) {
-    console.error('Erro ao carregar alunos:', err);
-    return false;
   }
-}
 
   // Inicialização assíncrona
   async function init() {
