@@ -10,21 +10,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const itemsPerPage = 10;
   let currentPage = 1;
   let currentSubscriptionId = null;
-  let students = [];
-  let plans = [];
+  let students = []; // Stores all student data
+  let plans = [];    // Stores all plan data
   let currentFilters = {
     plan: '',
     status: '',
     search: ''
   };
 
-  // ==== Autenticação Token ==== //
+  // ==== Authentication Token ==== //
   function getToken() {
     return localStorage.getItem('token');
   }
 
   function redirectToLogin() {
-    window.location.href = '../login/login.html';
+    window.location.href = '../login/login.html'; // Adjust path as needed
   }
 
   function authFetch(url, options = {}) {
@@ -40,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     return fetch(url, options).then(resp => {
       if (resp.status === 401 || resp.status === 403) {
-        // token inválido ou expirado
         localStorage.removeItem('token');
         redirectToLogin();
         return Promise.reject('Unauthorized');
@@ -55,127 +54,138 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Verifica autenticação ao carregar a página
-  checkAuth();
+  checkAuth(); // Verify authentication on page load
 
-  // Carrega planos para o select
+  // Load plans for select elements
   async function loadPlans() {
     try {
       const resp = await authFetch(plansUrl);
+      if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
       const data = await resp.json();
-      plans = data.results;
+      plans = data.results || []; // Ensure plans is an array
 
-      // Popula os selects de planos
       ['planSelect', 'editPlanSelect', 'filterPlan'].forEach(id => {
         const sel = document.getElementById(id);
-        sel.innerHTML = '<option value="">– Selecione o Plano –</option>';
-        plans.forEach(plan => {
-          const opt = document.createElement('option');
-          opt.value = plan.id;
-          opt.textContent = plan.name;
-          sel.append(opt);
-        });
+        if (sel) {
+          sel.innerHTML = '<option value="">– Selecione o Plano –</option>';
+          plans.forEach(plan => {
+            const opt = document.createElement('option');
+            opt.value = plan.id;
+            opt.textContent = plan.name;
+            sel.append(opt);
+          });
+        }
       });
       return true;
     } catch (err) {
       console.error('Erro ao carregar planos:', err);
+      // Consider showing a user-friendly error message
       return false;
     }
   }
 
-  // Carrega alunos para o select
-  // Carrega alunos para o select
+  // Load students for select elements and global array
   async function loadStudents() {
     try {
-      // Inicializar Select2 com AJAX apenas para studentSelect e editStudentSelect
+      // Initialize Select2 with AJAX for student selection in modals
       ['studentSelect', 'editStudentSelect'].forEach(id => {
-        $(`#${id}`).select2({
-          placeholder: '– Selecione o Aluno –',
-          allowClear: true,
-          width: '100%',
-          dropdownParent: id === 'studentSelect' ? $('#cadastroSubscriptionModal') : $('#editSubscriptionModal'),
-          minimumResultsForSearch: 1,
-          ajax: {
-            url: studentsUrl,
-            dataType: 'json',
-            delay: 250, // Atraso para evitar muitas requisições
-            // Configuração dos headers com token de autenticação
-            beforeSend: function (xhr) {
-              const token = getToken();
-              if (!token) {
-                redirectToLogin();
-                return false;
-              }
-              xhr.setRequestHeader('Content-Type', 'application/json');
-              xhr.setRequestHeader('Authorization', `Token ${token}`);
-            },
-            data: params => ({
-              search: params.term, // Termo de busca digitado
-              page: params.page || 1 // Página para paginação
-            }),
-            processResults: (data, params) => {
-              params.page = params.page || 1;
-              return {
-                results: data.results.map(student => ({
-                  id: student.id,
-                  text: `${student.first_name || ''} ${student.last_name || ''}`
-                })),
-                pagination: {
-                  more: !!data.next // Indica se há mais páginas
+        const selectElement = $(`#${id}`);
+        if (selectElement.length) { // Check if element exists
+          selectElement.select2({
+            placeholder: '– Selecione o Aluno –',
+            allowClear: true,
+            width: '100%',
+            dropdownParent: id === 'studentSelect' ? $('#cadastroSubscriptionModal') : $('#editSubscriptionModal'),
+            minimumInputLength: 1, // Start searching after 1 character
+            ajax: {
+              url: studentsUrl,
+              dataType: 'json',
+              delay: 250,
+              beforeSend: function (xhr) {
+                const token = getToken();
+                if (!token) {
+                  redirectToLogin();
+                  return false; // Prevent request if no token
                 }
-              };
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.setRequestHeader('Authorization', `Token ${token}`);
+              },
+              data: params => ({
+                search: params.term,
+                page: params.page || 1
+              }),
+              processResults: (data, params) => {
+                params.page = params.page || 1;
+                return {
+                  results: (data.results || []).map(student => ({
+                    id: student.id, // This ID is used as the value in Select2
+                    text: `${student.first_name || ''} ${student.last_name || ''}`.trim() || 'Aluno sem nome'
+                  })),
+                  pagination: {
+                    more: !!data.next
+                  }
+                };
+              },
+              error: function (xhr, status, error) {
+                if (xhr.status === 401 || xhr.status === 403) {
+                  localStorage.removeItem('token');
+                  redirectToLogin();
+                }
+                console.error('Erro na requisição AJAX do Select2:', error);
+              },
+              cache: true
             },
-            // Tratamento de erro para casos de token inválido
-            error: function (xhr, status, error) {
-              if (xhr.status === 401 || xhr.status === 403) {
-                localStorage.removeItem('token');
-                redirectToLogin();
-              }
-              console.error('Erro na requisição AJAX:', error);
-            },
-            cache: true
-          },
-          language: {
-            noResults: () => 'Nenhum aluno encontrado',
-            searching: () => 'Buscando...',
-            inputTooShort: () => 'Digite pelo menos 1 caractere',
-            loadingMore: () => 'Carregando mais resultados...'
-          }
-        });
+            language: {
+              noResults: () => 'Nenhum aluno encontrado',
+              searching: () => 'Buscando...',
+              inputTooShort: args => `Digite pelo menos ${args.minimum - args.input.length} caractere(s)`,
+              loadingMore: () => 'Carregando mais resultados...'
+            }
+          });
+        }
       });
 
-      // Carregar alunos na variável global apenas para outras funções, se necessário
+      // Load all students into the global 'students' array for getStudentName
       let allStudents = [];
       let nextUrl = studentsUrl;
       while (nextUrl) {
         const resp = await authFetch(nextUrl);
+        if (!resp.ok) throw new Error(`HTTP error while fetching all students! status: ${resp.status}`);
         const data = await resp.json();
-        allStudents = allStudents.concat(data.results);
+        allStudents = allStudents.concat(data.results || []);
         nextUrl = data.next;
       }
       students = allStudents;
       return true;
     } catch (err) {
       console.error('Erro ao carregar alunos:', err);
+      // Consider showing a user-friendly error message
       return false;
     }
   }
 
-  // Inicialização assíncrona
+  // Asynchronous initialization
   async function init() {
-    // Carrega os dados de referência primeiro
-    await Promise.all([loadPlans(), loadStudents()]);
+    // Load reference data first
+    const plansLoaded = await loadPlans();
+    const studentsLoaded = await loadStudents();
 
-    // Depois carrega as inscrições
-    loadSubscriptions();
-
-    // Configurar o botão de filtro
+    if (plansLoaded && studentsLoaded) {
+      // Then load subscriptions that depend on plans and students
+      loadSubscriptions();
+    } else {
+      console.error("Falha ao carregar dados essenciais (planos ou alunos). A lista de inscrições pode não funcionar corretamente.");
+      // Optionally display an error to the user
+       const ul = document.getElementById('subscriptions-list');
+       if(ul) {
+           ul.innerHTML = '<li class="list-group-item text-center text-danger">Erro ao carregar dados. Tente recarregar a página.</li>';
+       }
+    }
     setupFilterButton();
   }
 
-  // Configurar o botão de filtro e lógica de filtragem
+  // Configure filter button and logic
   function setupFilterButton() {
-    // Botão para abrir o modal de filtro
     const btnFiltrar = document.getElementById('btnFiltrarSubscription');
     if (btnFiltrar) {
       btnFiltrar.addEventListener('click', () => {
@@ -183,52 +193,45 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Botão para aplicar o filtro
     const applyFilterBtn = document.getElementById('applyFilter');
     if (applyFilterBtn) {
       applyFilterBtn.addEventListener('click', () => {
-        // Capturar valores do formulário
         currentFilters = {
           plan: document.getElementById('filterPlan').value,
-          status: document.getElementById('filterStatus').value
+          status: document.getElementById('filterStatus').value,
+          search: currentFilters.search // Keep existing search term
         };
-
-        // Fechar o modal e carregar inscrições filtradas
         filterModal.hide();
-        loadSubscriptions();
-
-        // Exibir um indicador de filtros ativos
+        loadSubscriptions(1); // Reset to page 1 with new filters
         updateFilterIndicator();
       });
     }
 
-    // Botão para limpar filtros (opcional)
     const clearFilterBtn = document.getElementById('clearFilter');
     if (clearFilterBtn) {
       clearFilterBtn.addEventListener('click', () => {
-        // Limpar o formulário de filtro
-        document.getElementById('filterForm').reset();
-
-        // Limpar filtros ativos
+        const filterForm = document.getElementById('filterForm');
+        if (filterForm) filterForm.reset();
+        
         currentFilters = {
           plan: '',
-          status: ''
+          status: '',
+          search: currentFilters.search // Keep existing search term unless cleared separately
         };
-
-        // Recarregar inscrições sem filtro
-        loadSubscriptions();
-
-        // Atualizar indicador de filtros
+        // If you want to clear search on "Clear Filters" too:
+        // document.getElementById('searchSubscription').value = '';
+        // currentFilters.search = '';
+        
+        filterModal.hide(); // Optionally hide if it was open
+        loadSubscriptions(1);
         updateFilterIndicator();
       });
     }
   }
-
-  // Atualiza o indicador visual de filtros ativos
+  
   function updateFilterIndicator() {
     const hasActiveFilters = currentFilters.plan || currentFilters.status;
     const btnFiltrar = document.getElementById('btnFiltrarSubscription');
-
     if (btnFiltrar) {
       if (hasActiveFilters) {
         btnFiltrar.classList.remove('btn-secondary');
@@ -242,18 +245,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Helper para mostrar badges de status
+  // Helper for status badges
   function statusBadge(status) {
     switch (status) {
       case 'active': return 'bg-success';
-      case 'paused': return 'bg-warning';
+      case 'paused': return 'bg-warning text-dark'; // Added text-dark for better contrast on yellow
       case 'canceled': return 'bg-danger';
       case 'expired': return 'bg-secondary';
-      default: return 'bg-light';
+      default: return 'bg-light text-dark'; // Added text-dark for better contrast on light
     }
   }
 
-  // Helper para formatar texto de status
+  // Helper for formatting status text
   function formatStatus(status) {
     const statusMap = {
       'active': 'Ativa',
@@ -261,92 +264,121 @@ document.addEventListener('DOMContentLoaded', () => {
       'canceled': 'Cancelada',
       'expired': 'Expirada'
     };
-    return statusMap[status] || status.charAt(0).toUpperCase() + status.slice(1);
+    return statusMap[status] || (status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Indefinido');
   }
 
-  // Helper para formatar datas
+  // Helper for formatting dates
   function formatDate(dateStr) {
     if (!dateStr) return 'Indefinido';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('pt-BR');
+    try {
+      const date = new Date(dateStr);
+      // Check if date is valid after parsing
+      if (isNaN(date.getTime())) {
+        return 'Data inválida';
+      }
+      return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' }); // Added timeZone UTC to avoid off-by-one day issues if API provides date only
+    } catch (e) {
+      console.error("Error formatting date:", dateStr, e);
+      return 'Data inválida';
+    }
   }
 
-  // Função para encontrar nome do aluno pelo ID
+  // Function to find student name by ID
   function getStudentName(id) {
-    const student = students.find(s => s.id === id);
-    return student ? `${student.first_name || ''} ${student.last_name || ''}` : 'Desconhecido';
+    if (id === null || id === undefined) return 'Desconhecido (ID não fornecido)';
+    // Ensure 'id' is an integer for comparison, as subscription.student is parsed to int.
+    const studentIdToFind = parseInt(id, 10);
+
+    const student = students.find(s => {
+      // Ensure s.id is also treated as an integer for comparison.
+      return parseInt(s.id, 10) === studentIdToFind;
+    });
+
+    if (!student) {
+      // console.warn(`Student not found for ID: ${studentIdToFind}. Available student IDs:`, students.map(s => s.id));
+      return 'Desconhecido';
+    }
+    return `${student.first_name || ''} ${student.last_name || ''}`.trim() || 'Aluno sem nome';
   }
 
-  // Função para encontrar nome do plano pelo ID
+  // Function to find plan name by ID
   function getPlanName(id) {
-    const plan = plans.find(p => p.id === id);
-    return plan ? plan.name : 'Desconhecido';
+    if (id === null || id === undefined) return 'Desconhecido (ID não fornecido)';
+    // Ensure 'id' is an integer for comparison.
+    const planIdToFind = parseInt(id, 10);
+
+    const plan = plans.find(p => {
+      // Ensure p.id is also treated as an integer for comparison.
+      return parseInt(p.id, 10) === planIdToFind;
+    });
+    
+    if (!plan) {
+        // console.warn(`Plan not found for ID: ${planIdToFind}. Available plan IDs:`, plans.map(p => p.id));
+        return 'Desconhecido';
+    }
+    return plan.name || 'Plano sem nome';
   }
 
-  // Carrega a lista de inscrições
+  // Load the list of subscriptions
   async function loadSubscriptions(page = 1) {
     try {
       currentPage = page;
-      // Construir URL com parâmetros de filtro
-      let url = subscriptionsUrl;
-      const params = new URLSearchParams();
+      let url = new URL(subscriptionsUrl);
+      
+      if (currentFilters.plan) url.searchParams.append('plan', currentFilters.plan);
+      if (currentFilters.status) url.searchParams.append('status', currentFilters.status);
+      if (currentFilters.search) url.searchParams.append('search', currentFilters.search);
+      url.searchParams.append('page', page);
+      // itemsPerPage is managed by backend pagination by default, if not, add:
+      // url.searchParams.append('page_size', itemsPerPage);
 
-      if (currentFilters.plan) params.append('plan', currentFilters.plan);
-      if (currentFilters.status) params.append('status', currentFilters.status);
-      if (currentFilters.search) params.append('search', currentFilters.search);
 
-      params.append('page', page);
-      // Adicionar parâmetros à URL se houver filtros
-      if (params.toString()) {
-        url += `?${params.toString()}`;
-      }
-
-      const resp = await authFetch(url);
+      const resp = await authFetch(url.toString());
+      if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
       const data = await resp.json();
+      
       const ul = document.getElementById('subscriptions-list');
+      if (!ul) return; // Element not found
       ul.innerHTML = '';
 
-      if (data.results.length === 0) {
+      if (!data.results || data.results.length === 0) {
         const li = document.createElement('li');
         li.className = 'list-group-item text-center';
         li.textContent = 'Nenhuma inscrição encontrada.';
         ul.append(li);
+        renderSubscriptionsPagination(data, page); // Still render pagination for "0 results" state
         return;
       }
 
       data.results.forEach(subscription => {
         const li = document.createElement('li');
-        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+        li.className = 'list-group-item d-flex flex-wrap justify-content-between align-items-center'; // Added flex-wrap
 
-        // Container para informações principais
         const infoDiv = document.createElement('div');
+        infoDiv.className = 'me-3 mb-2 mb-md-0'; // Margin for spacing
 
-        // Link para detalhes
         const link = document.createElement('a');
         link.href = '#';
-        link.className = 'fw-bold';
+        link.className = 'fw-bold d-block'; // d-block for better layout
         link.textContent = `Inscrição #${subscription.id}`;
         link.addEventListener('click', (e) => {
           e.preventDefault();
           showDetails(subscription);
         });
 
-        // Informações do aluno e plano
         const studentName = getStudentName(subscription.student);
         const planName = getPlanName(subscription.plan);
 
-        const info = document.createElement('div');
-        info.className = 'text-muted small';
-        info.textContent = `Aluno: ${studentName} | Plano: ${planName}`;
+        const subInfo = document.createElement('div');
+        subInfo.className = 'text-muted small';
+        subInfo.textContent = `Aluno: ${studentName} | Plano: ${planName}`;
+        
+        infoDiv.append(link, subInfo);
 
-        infoDiv.append(link, info);
-
-        // Datas
         const dates = document.createElement('div');
-        dates.className = 'text-muted small';
+        dates.className = 'text-muted small me-3 mb-2 mb-md-0';
         dates.textContent = `${formatDate(subscription.start_date)} → ${formatDate(subscription.end_date)}`;
 
-        // Badge de status
         const statusDiv = document.createElement('div');
         const badge = document.createElement('span');
         badge.className = `badge ${statusBadge(subscription.status)}`;
@@ -360,68 +392,175 @@ document.addEventListener('DOMContentLoaded', () => {
       renderSubscriptionsPagination(data, page);
     } catch (err) {
       console.error('Erro ao carregar inscrições:', err);
+      const ul = document.getElementById('subscriptions-list');
+      if (ul) {
+        ul.innerHTML = '<li class="list-group-item text-center text-danger">Erro ao carregar inscrições. Tente novamente.</li>';
+      }
     }
-
-    document.getElementById('btnSearchSubscription').addEventListener('click', function (e) {
-      e.preventDefault(); // Impede que o formulário recarregue a página
-
-      const searchValue = document.getElementById('searchSubscription').value.trim();
-      currentFilters.search = searchValue; // Atualiza o filtro global
-
-      loadSubscriptions(1); // Recarrega a lista com o filtro aplicado
-    });
-
+  }
+  
+  // Event listener for search button
+  const searchButton = document.getElementById('btnSearchSubscription');
+  if (searchButton) {
+      searchButton.addEventListener('click', function (e) {
+          e.preventDefault(); 
+          const searchInput = document.getElementById('searchSubscription');
+          if (searchInput) {
+              currentFilters.search = searchInput.value.trim();
+              loadSubscriptions(1); // Reload list with search filter, reset to page 1
+          }
+      });
+  }
+  // Optional: Add event listener for 'Enter' key on search input
+  const searchInput = document.getElementById('searchSubscription');
+  if (searchInput) {
+      searchInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+              e.preventDefault();
+              currentFilters.search = searchInput.value.trim();
+              loadSubscriptions(1);
+          }
+      });
   }
 
-  function renderSubscriptionsPagination(data, page) {
-    const pagination = document.getElementById('pagination');
-    pagination.innerHTML = '';
-    const totalPages = Math.ceil(data.count / itemsPerPage);
 
-    // Botão anterior
+  function renderSubscriptionsPagination(data, currentPage) {
+    const pagination = document.getElementById('pagination');
+    if (!pagination) return;
+    pagination.innerHTML = '';
+    
+    // Ensure data and data.count are available
+    const totalItems = data.count || 0;
+    const totalPages = Math.ceil(totalItems / itemsPerPage); // itemsPerPage should match backend if backend controls page size
+
+    if (totalPages <= 1 && totalItems === 0 && !currentFilters.search && !currentFilters.plan && !currentFilters.status) {
+        // Optionally hide pagination if only one page or no results unless filters are active
+        // pagination.style.display = 'none'; // Or just don't render anything
+        return;
+    }
+    // pagination.style.display = 'flex'; // Ensure it's visible
+
+
+    // Previous button
     const prevLi = document.createElement('li');
     prevLi.className = `page-item ${!data.previous ? 'disabled' : ''}`;
-    prevLi.innerHTML = `<a class="page-link" href="#">Anterior</a>`;
-    prevLi.addEventListener('click', e => {
+    const prevLink = document.createElement('a');
+    prevLink.className = 'page-link';
+    prevLink.href = '#';
+    prevLink.textContent = 'Anterior';
+    prevLink.addEventListener('click', e => {
       e.preventDefault();
-      if (data.previous) loadSubscriptions(currentPage - 1);
+      if (data.previous) {
+        // Extract page number from previous URL or decrement current page
+        try {
+            const prevUrl = new URL(data.previous);
+            loadSubscriptions(parseInt(prevUrl.searchParams.get('page') || currentPage - 1, 10));
+        } catch {
+            loadSubscriptions(currentPage - 1);
+        }
+      }
     });
+    prevLi.appendChild(prevLink);
     pagination.appendChild(prevLi);
 
-    // Páginas
-    for (let i = 1; i <= totalPages; i++) {
+    // Page numbers (simplified for brevity, could add ellipsis for many pages)
+    // Determine start and end page numbers for display
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, currentPage + 2);
+
+    if (currentPage <= 3) {
+        endPage = Math.min(totalPages, 5);
+    }
+    if (currentPage > totalPages - 3) {
+        startPage = Math.max(1, totalPages - 4);
+    }
+
+
+    if (startPage > 1) {
+        const firstLi = document.createElement('li');
+        firstLi.className = 'page-item';
+        const firstLink = document.createElement('a');
+        firstLink.className = 'page-link';
+        firstLink.href = '#';
+        firstLink.textContent = '1';
+        firstLink.addEventListener('click', e => { e.preventDefault(); loadSubscriptions(1); });
+        firstLi.appendChild(firstLink);
+        pagination.appendChild(firstLi);
+        if (startPage > 2) {
+            const ellipsisLi = document.createElement('li');
+            ellipsisLi.className = 'page-item disabled';
+            ellipsisLi.innerHTML = `<span class="page-link">...</span>`;
+            pagination.appendChild(ellipsisLi);
+        }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
       const li = document.createElement('li');
       li.className = `page-item ${i === currentPage ? 'active' : ''}`;
-      li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-      li.addEventListener('click', e => {
-        e.preventDefault();
-        loadSubscriptions(i);
-      });
+      const link = document.createElement('a');
+      link.className = 'page-link';
+      link.href = '#';
+      link.textContent = i;
+      link.addEventListener('click', (e => {
+        return function(event) {
+          event.preventDefault();
+          loadSubscriptions(e);
+        }
+      })(i)); // Closure to capture correct 'i'
+      li.appendChild(link);
       pagination.appendChild(li);
     }
 
-    // Botão próxima
+     if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            const ellipsisLi = document.createElement('li');
+            ellipsisLi.className = 'page-item disabled';
+            ellipsisLi.innerHTML = `<span class="page-link">...</span>`;
+            pagination.appendChild(ellipsisLi);
+        }
+        const lastLi = document.createElement('li');
+        lastLi.className = 'page-item';
+        const lastLink = document.createElement('a');
+        lastLink.className = 'page-link';
+        lastLink.href = '#';
+        lastLink.textContent = totalPages;
+        lastLink.addEventListener('click', e => { e.preventDefault(); loadSubscriptions(totalPages); });
+        lastLi.appendChild(lastLink);
+        pagination.appendChild(lastLi);
+    }
+
+    // Next button
     const nextLi = document.createElement('li');
     nextLi.className = `page-item ${!data.next ? 'disabled' : ''}`;
-    nextLi.innerHTML = `<a class="page-link" href="#">Próxima</a>`;
-    nextLi.addEventListener('click', e => {
+    const nextLink = document.createElement('a');
+    nextLink.className = 'page-link';
+    nextLink.href = '#';
+    nextLink.textContent = 'Próxima';
+    nextLink.addEventListener('click', e => {
       e.preventDefault();
-      if (data.next) loadSubscriptions(currentPage + 1);
+      if (data.next) {
+        try {
+            const nextUrl = new URL(data.next);
+            loadSubscriptions(parseInt(nextUrl.searchParams.get('page') || currentPage + 1, 10));
+        } catch {
+            loadSubscriptions(currentPage + 1);
+        }
+      }
     });
+    nextLi.appendChild(nextLink);
     pagination.appendChild(nextLi);
   }
 
-  // Mostra detalhes da inscrição no modal
+  // Show subscription details in modal
   function showDetails(subscription) {
     currentSubscriptionId = subscription.id;
     const detailsList = document.getElementById('subscription-details');
+    if (!detailsList) return;
     detailsList.innerHTML = '';
 
-    // Obtém nomes do aluno e plano
     const studentName = getStudentName(subscription.student);
     const planName = getPlanName(subscription.plan);
 
-    // Cria lista de detalhes
     const details = [
       { label: 'ID', value: subscription.id },
       { label: 'Aluno', value: studentName },
@@ -434,141 +573,193 @@ document.addEventListener('DOMContentLoaded', () => {
     details.forEach(detail => {
       const li = document.createElement('li');
       li.className = 'list-group-item';
+      const strong = document.createElement('strong');
+      strong.textContent = `${detail.label}: `;
+      li.appendChild(strong);
 
       if (detail.badge) {
-        li.textContent = `${detail.label}: `;
         const badge = document.createElement('span');
         badge.className = `badge ${statusBadge(detail.value)}`;
         badge.textContent = formatStatus(detail.value);
         li.append(badge);
       } else {
-        li.textContent = `${detail.label}: ${detail.value}`;
+        li.append(document.createTextNode(String(detail.value)));
       }
-
       detailsList.append(li);
     });
+    
+    const modalLabel = document.getElementById('subscriptionModalLabel');
+    if (modalLabel) modalLabel.textContent = `Detalhes da Inscrição #${subscription.id}`;
 
-    document.getElementById('subscriptionModalLabel').textContent = `Inscrição #${subscription.id}`;
-
-    // Configurar botões de ações
-    document.getElementById('btnEditarSubscription').onclick = () => {
+    const btnEditar = document.getElementById('btnEditarSubscription');
+    if(btnEditar) btnEditar.onclick = () => {
       subscriptionModal.hide();
-      populateEditForm(subscription);
+      populateEditForm(subscription); // Pass the full subscription object
       editModal.show();
     };
 
-    document.getElementById('btnExcluirSubscription').onclick = () => {
-      if (confirm(`Deseja realmente excluir a inscrição #${subscription.id}?`)) {
-        deleteSubscription(subscription.id);
-      }
+    const btnExcluir = document.getElementById('btnExcluirSubscription');
+    // Custom confirm modal logic should be implemented here instead of window.confirm
+    if(btnExcluir) btnExcluir.onclick = () => {
+        // Replace with a custom confirmation modal for better UX
+        // For now, using a simple confirm for demonstration
+        if (window.confirm(`Deseja realmente excluir a inscrição #${subscription.id}? Esta ação não pode ser desfeita.`)) {
+             deleteSubscription(subscription.id);
+        }
     };
-
     subscriptionModal.show();
   }
-
-  // Preenche o formulário de edição
+  
+  // Pre-fill the edit form
   function populateEditForm(subscription) {
     document.getElementById('editSubId').value = subscription.id;
-    document.getElementById('editStudentSelect').value = subscription.student;
+    
+    // For Select2, you need to set the value and potentially add the option if not present
+    const studentSelect = $('#editStudentSelect');
+    if (studentSelect.find(`option[value='${subscription.student}']`).length) {
+        studentSelect.val(subscription.student).trigger('change');
+    } else {
+        // If student might not be in the initial list loaded by Select2's AJAX (e.g. due to pagination)
+        // Fetch student details to create an option and append it
+        const studentName = getStudentName(subscription.student); // Or fetch from API if name not in global `students`
+        const option = new Option(studentName || `Aluno ID ${subscription.student}`, subscription.student, true, true);
+        studentSelect.append(option).trigger('change');
+    }
+
     document.getElementById('editPlanSelect').value = subscription.plan;
     document.getElementById('editSubStatus').value = subscription.status;
-    document.getElementById('editStartDate').value = subscription.start_date;
-    document.getElementById('editEndDate').value = subscription.end_date || '';
+    
+    // Dates need to be in YYYY-MM-DD format for date inputs
+    document.getElementById('editStartDate').value = subscription.start_date ? subscription.start_date.split('T')[0] : '';
+    document.getElementById('editEndDate').value = subscription.end_date ? subscription.end_date.split('T')[0] : '';
   }
 
-  // Cadastro de nova inscrição
-  document.getElementById('btnCadastrarSubscription').addEventListener('click', () => {
-    cadastroModal.show();
-  });
 
-  // Envio do formulário de cadastro
-  document.getElementById('cadastroSubscriptionForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
+  // Handle new subscription form submission
+  const cadastroForm = document.getElementById('cadastroSubscriptionForm');
+  if (cadastroForm) {
+    cadastroForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const studentId = document.getElementById('studentSelect').value;
+      const planId = document.getElementById('planSelect').value;
+      const startDate = document.getElementById('startDate').value;
 
-    const subscription = {
-      student: parseInt(document.getElementById('studentSelect').value),
-      plan: parseInt(document.getElementById('planSelect').value),
-      start_date: document.getElementById('startDate').value,
-      end_date: document.getElementById('endDate').value || null,
-      status: document.getElementById('subStatus').value,
-    };
+      if (!studentId || !planId || !startDate) {
+        // Replace alert with a more robust validation message display
+        alert('Aluno, Plano e Data de Início são obrigatórios.');
+        return;
+      }
 
-    try {
-      const res = await authFetch(subscriptionsUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(subscription)
+      const subscriptionData = {
+        student: parseInt(studentId, 10),
+        plan: parseInt(planId, 10),
+        start_date: startDate,
+        end_date: document.getElementById('endDate').value || null,
+        status: document.getElementById('subStatus').value,
+      };
+
+      try {
+        const res = await authFetch(subscriptionsUrl, {
+          method: 'POST',
+          body: JSON.stringify(subscriptionData)
+        });
+
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({detail: 'Erro ao cadastrar. Verifique os dados.'}));
+            throw new Error(errorData.detail || `Erro HTTP ${res.status}`);
+        }
+        
+        // const result = await res.json(); // If needed
+        cadastroModal.hide();
+        cadastroForm.reset();
+        $('#studentSelect').val(null).trigger('change'); // Reset Select2
+
+        loadSubscriptions(currentPage); // Reload to current page or page 1
+        alert('Inscrição cadastrada com sucesso!'); // Replace with better notification
+      } catch (err) {
+        console.error('Erro ao cadastrar inscrição:', err);
+        alert(`Erro ao cadastrar inscrição: ${err.message}`); // Replace
+      }
+    });
+  }
+  
+  // Open modal for new subscription
+  const btnCadastrar = document.getElementById('btnCadastrarSubscription');
+  if(btnCadastrar) {
+      btnCadastrar.addEventListener('click', () => {
+        // Reset form before showing
+        const form = document.getElementById('cadastroSubscriptionForm');
+        if(form) form.reset();
+        $('#studentSelect').val(null).trigger('change'); // Reset select2 field
+        $('#planSelect').val("").trigger('change'); // Reset regular select
+        $('#subStatus').val("active"); // Default status
+        
+        cadastroModal.show();
       });
+  }
 
-      if (!res.ok) throw new Error('Erro ao cadastrar inscrição');
 
-      const result = await res.json();
-      cadastroModal.hide();
+  // Handle edit subscription form submission
+  const editForm = document.getElementById('editSubscriptionForm');
+  if (editForm) {
+    editForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('editSubId').value;
+      const studentId = document.getElementById('editStudentSelect').value;
+      const planId = document.getElementById('editPlanSelect').value;
+      const startDate = document.getElementById('editStartDate').value;
 
-      // Limpa formulário
-      document.getElementById('cadastroSubscriptionForm').reset();
+      if (!studentId || !planId || !startDate) {
+        alert('Aluno, Plano e Data de Início são obrigatórios.'); // Replace
+        return;
+      }
 
-      // Atualiza a lista
-      loadSubscriptions();
+      const subscriptionData = {
+        student: parseInt(studentId, 10),
+        plan: parseInt(planId, 10),
+        start_date: startDate,
+        end_date: document.getElementById('editEndDate').value || null,
+        status: document.getElementById('editSubStatus').value,
+      };
 
-      alert('Inscrição cadastrada com sucesso!');
-    } catch (err) {
-      console.error(err);
-      alert('Erro ao cadastrar inscrição.');
-    }
-  });
+      try {
+        const res = await authFetch(`${subscriptionsUrl}${id}/`, {
+          method: 'PUT',
+          body: JSON.stringify(subscriptionData)
+        });
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({detail: 'Erro ao atualizar. Verifique os dados.'}));
+            throw new Error(errorData.detail || `Erro HTTP ${res.status}`);
+        }
+        editModal.hide();
+        loadSubscriptions(currentPage); // Stay on current page after edit
+        alert('Inscrição atualizada com sucesso!'); // Replace
+      } catch (err) {
+        console.error('Erro ao atualizar inscrição:', err);
+        alert(`Erro ao atualizar inscrição: ${err.message}`); // Replace
+      }
+    });
+  }
 
-  // Envio do formulário de edição
-  document.getElementById('editSubscriptionForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const id = document.getElementById('editSubId').value;
-    const subscription = {
-      student: parseInt(document.getElementById('editStudentSelect').value),
-      plan: parseInt(document.getElementById('editPlanSelect').value),
-      start_date: document.getElementById('editStartDate').value,
-      end_date: document.getElementById('editEndDate').value || null,
-      status: document.getElementById('editSubStatus').value,
-    };
-
-    try {
-      const res = await authFetch(`${subscriptionsUrl}${id}/`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(subscription)
-      });
-
-      if (!res.ok) throw new Error('Erro ao atualizar inscrição');
-
-      editModal.hide();
-      loadSubscriptions();
-
-      alert('Inscrição atualizada com sucesso!');
-    } catch (err) {
-      console.error(err);
-      alert('Erro ao atualizar inscrição.');
-    }
-  });
-
-  // Função para excluir inscrição
+  // Function to delete subscription
   async function deleteSubscription(id) {
     try {
       const res = await authFetch(`${subscriptionsUrl}${id}/`, {
         method: 'DELETE'
       });
-
-      if (!res.ok) throw new Error('Erro ao excluir inscrição');
-
+      if (!res.ok && res.status !== 204) { // 204 No Content is a success for DELETE
+         const errorData = await res.json().catch(() => ({detail: 'Erro ao excluir.'}));
+         throw new Error(errorData.detail || `Erro HTTP ${res.status}`);
+      }
       subscriptionModal.hide();
-      loadSubscriptions();
-
-      alert('Inscrição excluída com sucesso!');
+      loadSubscriptions(); // Reload to page 1 or current page
+      alert('Inscrição excluída com sucesso!'); // Replace
     } catch (err) {
-      console.error(err);
-      alert('Erro ao excluir inscrição.');
+      console.error('Erro ao excluir inscrição:', err);
+      alert(`Erro ao excluir inscrição: ${err.message}`); // Replace
     }
   }
 
-  // Carrega dados iniciais
+  // Initial data load
   init();
 });
