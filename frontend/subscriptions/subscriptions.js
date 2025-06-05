@@ -272,23 +272,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Função para encontrar nome do aluno pelo ID
-  async function getStudentNameAsync(id) {
-  let student = students.find(s => s.id === id);
-  if (student) {
-    return `${student.first_name || ''} ${student.last_name || ''}`;
+  function getStudentName(id) {
+    const student = students.find(s => s.id === id);
+    return student ? `${student.first_name || ''} ${student.last_name || ''}` : 'Desconhecido';
   }
-  // Busca extra se não encontrar localmente
-  try {
-    const resp = await authFetch(`${studentsUrl}${id}/`);
-    if (!resp.ok) return 'Desconhecido';
-    student = await resp.json();
-    // Opcional: adicionar ao array global para cache futuro
-    students.push(student);
-    return `${student.first_name || ''} ${student.last_name || ''}`;
-  } catch {
-    return 'Desconhecido';
-  }
-}
 
   // Função para encontrar nome do plano pelo ID
   function getPlanName(id) {
@@ -345,7 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Informações do aluno e plano
-        const studentName = getStudentNameAsync(subscription.student);
+        const studentName = getStudentName(subscription.student);
         const planName = getPlanName(subscription.plan);
 
         const info = document.createElement('div');
@@ -431,7 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
     detailsList.innerHTML = '';
 
     // Obtém nomes do aluno e plano
-    const studentName = getStudentNameAsync(subscription.student);
+    const studentName = getStudentName(subscription.student);
     const planName = getPlanName(subscription.plan);
 
     // Cria lista de detalhes
