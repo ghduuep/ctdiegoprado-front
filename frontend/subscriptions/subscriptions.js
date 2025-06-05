@@ -274,7 +274,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Função para encontrar nome do aluno pelo ID
   function getStudentName(id) {
     const student = students.find(s => s.id === id);
-    console.log(student.first_name);
     return student ? `${student.first_name || ''} ${student.last_name || ''}` : 'Desconhecido';
   }
 
