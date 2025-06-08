@@ -271,19 +271,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return date.toLocaleDateString('pt-BR');
   }
 
-  // Função para encontrar nome do aluno pelo ID
-  async function getStudentName(id) {
-    const resp = await authFetch(`${studentsUrl}${id}/`)
-    const student = await resp.json();
-    return student ? `${student.first_name || ''} ${student.last_name || ''}` : 'Desconhecido';
-  }
-
-  // Função para encontrar nome do plano pelo ID
-  function getPlanName(id) {
-    const plan = plans.find(p => p.id === id);
-    return plan ? plan.name : 'Desconhecido';
-  }
-
   // Carrega a lista de inscrições
   async function loadSubscriptions(page = 1) {
     try {
@@ -333,8 +320,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Informações do aluno e plano
-        const studentName = getStudentName(subscription.student);
-        const planName = getPlanName(subscription.plan);
+        const studentName = subscription.student_name;
+        const planName = subscription.plan_name;
 
         const info = document.createElement('div');
         info.className = 'text-muted small';
@@ -419,8 +406,8 @@ document.addEventListener('DOMContentLoaded', () => {
     detailsList.innerHTML = '';
 
     // Obtém nomes do aluno e plano
-    const studentName = getStudentName(subscription.student);
-    const planName = getPlanName(subscription.plan);
+    const studentName = subscription.student_name;
+    const planName = subscription.plan_name;
 
     // Cria lista de detalhes
     const details = [
