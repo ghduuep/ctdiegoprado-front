@@ -12,14 +12,15 @@
 </head>
 
 <body>
-  
+
   <header>
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
       <div class="container-fluid">
         <a class="navbar-brand" href="#">
           <img src="../images/ctdiegopradologo.jpeg" alt="Bootstrap" width="60" height="32">
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+          aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
@@ -44,7 +45,8 @@
         </div>
       </div>
       <form class="d-flex justify-content-end me-3" role="search">
-        <input class="form-control me-2" type="search" id="searchSubscription" placeholder="Search" aria-label="Search" />
+        <input class="form-control me-2" type="search" id="searchSubscription" placeholder="Search"
+          aria-label="Search" />
         <button class="btn btn-outline-success" type="submit" id="btnSearchSubscription">Search</button>
       </form>
     </nav>
@@ -189,12 +191,11 @@
           </div>
           <div class="modal-body">
             <input type="hidden" id="editSubId">
+            <input type="hidden" id="editSubStudentId" name="student_id" />
             <div class="row g-3">
               <div class="col-md-6">
                 <label for="editStudentSelect" class="form-label">Aluno</label>
-                <select id="editStudentSelect" class="form-select" required>
-                  <option value="">– Selecione o Aluno –</option>
-                </select>
+                <input type="text" class="form-control-plaintext" id="editStudentName" readonly />
               </div>
               <div class="col-md-6">
                 <label for="editPlanSelect" class="form-label">Plano</label>
@@ -231,41 +232,41 @@
   </div>
 
   <!-- Modal de Filtro -->
-<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="filterModalLabel">Filtrar Inscrições</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="filterForm">
-          <div class="mb-3">
-            <label for="filterPlan" class="form-label">Plano</label>
-            <select class="form-select" id="filterPlan" name="plan">
-              <option value="">Selecione um plano</option>
-              <!-- Options de planos serão carregadas pelo JS -->
-            </select>
-          </div>
-          <div class="mb-3">
-            <label for="filterStatus" class="form-label">Status</label>
-            <select class="form-select" id="filterStatus" name="status">
-              <option value="">Selecione o status</option>
-              <option value="active">Ativa</option>
-              <option value="paused">Pausada</option>
-              <option value="expired">Expirada</option>
-              <option value="canceled">Cancelada</option>
-            </select>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-        <button type="button" class="btn btn-primary" id="applyFilter">Aplicar Filtro</button>
+  <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="filterModalLabel">Filtrar Inscrições</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="filterForm">
+            <div class="mb-3">
+              <label for="filterPlan" class="form-label">Plano</label>
+              <select class="form-select" id="filterPlan" name="plan">
+                <option value="">Selecione um plano</option>
+                <!-- Options de planos serão carregadas pelo JS -->
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="filterStatus" class="form-label">Status</label>
+              <select class="form-select" id="filterStatus" name="status">
+                <option value="">Selecione o status</option>
+                <option value="active">Ativa</option>
+                <option value="paused">Pausada</option>
+                <option value="expired">Expirada</option>
+                <option value="canceled">Cancelada</option>
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+          <button type="button" class="btn btn-primary" id="applyFilter">Aplicar Filtro</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
 
   <footer class="container mt-5 mb-4 text-center text-muted">
@@ -275,10 +276,10 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
     crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <script src="subscriptions.js"></script>
-  
+
 </body>
 
 </html>

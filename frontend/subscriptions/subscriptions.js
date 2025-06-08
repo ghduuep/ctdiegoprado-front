@@ -271,6 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return date.toLocaleDateString('pt-BR');
   }
 
+
   // Carrega a lista de inscrições
   async function loadSubscriptions(page = 1) {
     try {
@@ -457,7 +458,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Preenche o formulário de edição
   function populateEditForm(subscription) {
     document.getElementById('editSubId').value = subscription.id;
-    document.getElementById('editStudentSelect').value = subscription.student;
+    document.getElementById('editSubStudentId').value = subscription.student_id;
+    document.getElementById('editStudentName').value = subscription.student_name;
     document.getElementById('editPlanSelect').value = subscription.plan;
     document.getElementById('editSubStatus').value = subscription.status;
     document.getElementById('editStartDate').value = subscription.start_date;
@@ -512,7 +514,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const id = document.getElementById('editSubId').value;
     const subscription = {
-      student: parseInt(document.getElementById('editStudentSelect').value),
+      student: parseInt(document.getElementById('editSubStudentId').value),
       plan: parseInt(document.getElementById('editPlanSelect').value),
       start_date: document.getElementById('editStartDate').value,
       end_date: document.getElementById('editEndDate').value || null,
