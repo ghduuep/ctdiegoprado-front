@@ -272,8 +272,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Função para encontrar nome do aluno pelo ID
-  function getStudentName(id) {
-    const student = students.find(s => s.id === id);
+  async function getStudentName(id) {
+    const resp = await authFetch(`${studentsUrl}${id}/`)
+    const student = await resp.json();
     return student ? `${student.first_name || ''} ${student.last_name || ''}` : 'Desconhecido';
   }
 
