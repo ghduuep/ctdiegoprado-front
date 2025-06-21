@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   console.log('index.js carregado');
-  const subscriptionsUrl = "https://ctdiegoprado-api-production.up.railway.app/api/subscriptions/";
+  const dashboardUrl = "https://ctdiegoprado-api-production.up.railway.app/api/dashboard-status/";
 
    // ==== Autenticação Token ==== //
   function getToken() {
@@ -48,52 +48,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Função para buscar e exibir os dados do dashboard
   async function loadDashboardData() {
-    console.log('Iniciando carga de dados para:', subscriptionsUrl);
+    console.log('Iniciando carga de dados para:', dashboardUrl);
     // Inicializa com "..." enquanto carrega
     cardIds.forEach(id => document.getElementById(id).textContent = '...');
 
     try {
       // Busca os dados das inscrições
-      const response = await authFetch(subscriptionsUrl);
+      const response = await authFetch(dashboardUrl);
       console.log('Resposta recebida:', { status: response.status, ok: response.ok });
       if (!response.ok) {
         throw new Error(`Erro ao buscar dados: ${response.status} ${response.statusText}`);
       }
       const data = await response.json();
       console.log('Dados recebidos:', data);
-
-      // Lida com diferentes formatos de resposta
-      const subscriptions = Array.isArray(data) ? data : data.results || [];
-      console.log('Inscrições:', subscriptions);
-
-      // Se não houver dados, exibe 0
-      if (subscriptions.length === 0) {
-        console.log('Nenhuma inscrição encontrada');
-        cardIds.forEach(id => document.getElementById(id).textContent = '0');
-        return;
-      }
-
-      // Normaliza status para evitar problemas de maiúsculas/minúsculas
-      const normalizeStatus = status => status ? status.toLowerCase() : '';
-
-      // Calcula os totais
-      const totalClientes = subscriptions.filter(sub => 
-        ['active', 'paused', 'expired'].includes(normalizeStatus(sub.status))
-      ).length;
-
-      const mensalidadesAtivas = subscriptions.filter(sub => 
-        normalizeStatus(sub.status) === 'active'
-      ).length;
-
-      const mensalidadesPausadas = subscriptions.filter(sub => 
-        normalizeStatus(sub.status) === 'paused'
-      ).length;
-
-      const mensalidadesExpiradas = subscriptions.filter(sub => 
-        normalizeStatus(sub.status) === 'expired'
-      ).length;
-
-      console.log('Totais:', { totalClientes, mensalidadesAtivas, mensalidadesPausadas, mensalidadesExpiradas });
+      totalClientes = data.totalClientes
+      mensalidadesAtivas = data.mensalidadesAtivas
+      mensalidadesPausadas = data.mensalidadesPausadas
+      mensalidadesExpiradas = data.mensalidadesExpiradas
 
       // Atualiza os elementos HTML
       document.getElementById('totalClientes').textContent = totalClientes;
