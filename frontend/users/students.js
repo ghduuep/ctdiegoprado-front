@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
       { label: 'Endereço', value: student.adress || 'Sem descrição' },
       { label: 'Data de Nascimento', value: formatDate(student.birthday_date) },
       { label: 'Idade', value: calcAge(student.birthday_date) },
-      { label: 'Criado em', value: formatDate(plan.created_at) }
+      { label: 'Criado em', value: formatDate(student.created_at) }
     ];
 
     details.forEach(detail => {
