@@ -88,6 +88,48 @@ document.addEventListener('DOMContentLoaded', () => {
     return date.toLocaleDateString('pt-BR');
   }
 
+  function showDetails(student) {
+    currentStudentId = student.id;
+    const detailsList = document.getElementById('student-details');
+    detailsList.innerHTML = '';
+
+    const details = [
+      { label: 'ID', value: student.id },
+      { label: 'Nome', value: student.first_name },
+      { label: 'Sobrenome', value: student.last_name },
+      { label: 'Telefone', value: student.phone },
+      { label: 'Email', value: student.email  || 'Vazio'},
+      { label: 'Endereço', value: student.adress || 'Sem descrição' },
+      { label: 'Data de Nascimento', value: formatDate(student.birthday_date) },
+      { label: 'Idade', value: calcAge(student.birthday_date) },
+      { label: 'Criado em', value: formatDate(plan.created_at) }
+    ];
+
+    details.forEach(detail => {
+      const li = document.createElement('li');
+      li.className = 'list-group-item';
+      li.textContent = `${detail.label}: ${detail.value}`;
+      detailsList.append(li);
+    });
+
+    document.getElementById('studentModalLabel').textContent = `${student.first_name} ${student.last_name}`;
+
+    // Configurar botões de ações
+    document.getElementById('btnEditarAluno').onclick = () => {
+      studentModal.hide();
+      populateEditForm(student);
+      editModal.show();
+    };
+
+    document.getElementById('btnExcluirAluno').onclick = () => {
+      if (confirm(`Deseja realmente excluir o aluno ${student.first_name} ${student.last_name}?`)) {
+        deleteStudent(student.id);
+      }
+    };
+
+    studentModal.show();
+  }
+
   // Calcula idade
   function calcAge(birthDate) {
     if (!birthDate) return 'Não informado';
