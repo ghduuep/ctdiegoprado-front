@@ -15,27 +15,32 @@
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
       <div class="container-fluid">
         <a class="navbar-brand" href="#">
-      <img src="../images/ctdiegopradologo.jpeg" alt="Bootstrap" width="60" height="32">
-        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-          <div class="navbar-nav">
-            <a class="nav-link" href="../index.html">Página Inicial</a>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                aria-expanded="false">
-                Dashboard
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="../users/students.html">Alunos</a></li>
-                <li><a class="dropdown-item active" href="plans.html" aria-current="page">Planos</a></li>
-                <li>
-                  <hr class="dropdown-divider">
-                </li>
-                <li><a class="dropdown-item" href="../subscriptions/subscriptions.html">Inscrições</a></li>
-              </ul>
-            </li>
-            <a class="nav-link" href="../finance/finance.html">Financeiro</a>
+          <img src="../images/ctdiegopradologo.jpeg" alt="Bootstrap" width="60" height="32">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+              <a class="nav-link" href="../index.html">Página Inicial</a>
+              <li class="nav-item dropdown">
+
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                  aria-expanded="false">
+                  Dashboard
+                </a>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="../users/students.html">Alunos</a></li>
+                  <li><a class="dropdown-item active" href="plans.html" aria-current="page">Planos</a></li>
+                  <li>
+                    <hr class="dropdown-divider">
+                  </li>
+                  <li><a class="dropdown-item" href="../subscriptions/subscriptions.html">Inscrições</a></li>
+                </ul>
+              </li>
+              <a class="nav-link" href="../finance/finance.html">Financeiro</a>
+            </div>
           </div>
-        </div>
       </div>
     </nav>
   </header>
@@ -51,7 +56,7 @@
     <!-- Container dos botões -->
     <div class="row mb-4">
       <div class="col d-flex justify-content-center">
-        <button id="btnCadastrarPlano" class="btn btn-primary" data-bs-toggle="modal" 
+        <button id="btnCadastrarPlano" class="btn btn-primary" data-bs-toggle="modal"
           data-bs-target="#cadastroPlanoModal">
           <i class="bi bi-plus-circle me-1"></i> Cadastrar Plano
         </button>
@@ -148,8 +153,7 @@
   </div>
 
   <!-- Modal para editar plano -->
-  <div class="modal fade" id="editPlanModal" tabindex="-1" aria-labelledby="editPlanModalLabel"
-    aria-hidden="true">
+  <div class="modal fade" id="editPlanModal" tabindex="-1" aria-labelledby="editPlanModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <form id="editPlanForm">

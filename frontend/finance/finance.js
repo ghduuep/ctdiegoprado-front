@@ -2,8 +2,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   (async function loadGanhosTotais() {
-    const subscriptionsUrl = "https://ctdiegoprado-api-production.up.railway.app/api/subscriptions/?status=active";
-    const plansUrl         = "https://ctdiegoprado-api-production.up.railway.app/api/plans/";
+    const financialUrl = "https://ctdiegoprado-api-production.up.railway.app/api/financial-summary";
     const cardElem         = document.getElementById("ganhosTotais");
 
      // ==== Autenticação Token ==== //
@@ -47,51 +46,12 @@ document.addEventListener('DOMContentLoaded', () => {
   checkAuth();
 
     try {
-      console.log("→ Chamando inscrição ativa em:", subscriptionsUrl);
-      console.log("→ Chamando lista de planos em:  ", plansUrl);
-
-      const [subsRes, plansRes] = await Promise.all([
-        authFetch(subscriptionsUrl),
-        authFetch(plansUrl)
-      ]);
-
-      console.log("← subscriptions response:", subsRes.url, subsRes.status);
-      console.log("← plans response:        ", plansRes.url, plansRes.status);
-
-      if (!subsRes.ok) {
-        throw new Error(`Erro ao buscar assinaturas: ${subsRes.status}`);
+      const response = await authFetch(financialUrl);
+      if (!response.ok) {
+        throw new Error(`Erro ao buscar dados: ${response.status} ${response.statusText}`);
       }
-      if (!plansRes.ok) {
-        throw new Error(`Erro ao buscar planos: ${plansRes.status}`);
-      }
-
-      // Parse JSON
-      const subsData = await subsRes.json();
-      const plansData = await plansRes.json();
-
-      // DEBUG: veja o formato completo
-      console.log("subscriptions JSON:", subsData);
-      console.log("plans JSON:", plansData);
-
-      // Se vier paginado, pegue .results, senão use direto
-      const subscriptions = Array.isArray(subsData)
-        ? subsData
-        : (Array.isArray(subsData.results) ? subsData.results : []);
-      const plans = Array.isArray(plansData)
-        ? plansData
-        : (Array.isArray(plansData.results) ? plansData.results : []);
-
-      // Mapeia plan.id → plan.price (Number)
-      const planValueMap = new Map();
-      plans.forEach(plan => {
-        planValueMap.set(plan.id, parseFloat(plan.price));
-      });
-
-      // Soma os valores dos planos das assinaturas ativas
-      const total = subscriptions.reduce((sum, sub) => {
-        const valorPlano = planValueMap.get(sub.plan) || 0;
-        return sum + valorPlano;
-      }, 0);
+      const data = await response.json();
+      const total = data.total_mensalidades_ativas
 
       // Formata como moeda em pt-BR
       cardElem.textContent = total.toLocaleString('pt-BR', {
