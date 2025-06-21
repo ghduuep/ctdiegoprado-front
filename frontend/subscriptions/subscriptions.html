@@ -9,6 +9,15 @@
     integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous" />
   <link rel="shortcut icon" href="../images/ctdiegopradologo.jpeg" />
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+    <style>
+    .texto-obrigatorio {
+      color: #dc3545;
+      font-size: 0.8em;
+      font-weight: 500;
+      margin-left: 4px;
+    }
+  </style>
 </head>
 
 <body>
@@ -117,19 +126,19 @@
             <div class="row g-3">
               <!-- Dados da inscrição -->
               <div class="col-md-6">
-                <label for="studentSelect" class="form-label">Aluno (obrigatório)</label>
+                <label for="studentSelect" class="form-label">Aluno (<span class="texto-obrigatorio">(obrigatório)</span>)</label>
                 <select id="studentSelect" class="form-select select2" required>
                   <option value="">– Selecione o Aluno –</option>
                 </select>
               </div>
               <div class="col-md-6">
-                <label for="planSelect" class="form-label">Plano (obrigatório)</label>
+                <label for="planSelect" class="form-label">Plano (<span class="texto-obrigatorio">(obrigatório)</span>)</label>
                 <select id="planSelect" class="form-select" required>
                   <option value="">– Selecione o Plano –</option>
                 </select>
               </div>
               <div class="col-md-6">
-                <label for="subStatus" class="form-label">Status da Inscrição (obrigatório)</label>
+                <label for="subStatus" class="form-label">Status da Inscrição (<span class="texto-obrigatorio">(obrigatório)</span>)</label>
                 <select id="subStatus" class="form-select" required>
                   <option value="active">Ativa</option>
                   <option value="paused">Pausada</option>
@@ -138,7 +147,7 @@
                 </select>
               </div>
               <div class="col-md-6">
-                <label for="startDate" class="form-label">Data de Início (obrigatório)</label>
+                <label for="startDate" class="form-label">Data de Início (<span class="texto-obrigatorio">(obrigatório)</span>)</label>
                 <input type="date" class="form-control" id="startDate" required />
               </div>
               <div class="col-md-6">
